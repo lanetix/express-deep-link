@@ -1,3 +1,5 @@
+Compatible with [express 4.x](http://expressjs.com/4x/api.html).
+
 ### Options
 -----------
 
@@ -161,4 +163,19 @@ var app = express();
 // and if it's not, deeplink will cache the current url and redirect to login
 app.use(authentication);
 app.use(deeplink);
+```
+
+### Tests
+---------
+
+```shell
+git clone git@github.com:armw4/express-deep-link.git
+
+cd express-deep-link
+
+npm install
+
+npm install -g gulp
+
+gulp test
 ```
