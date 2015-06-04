@@ -1,3 +1,67 @@
+### Options
+
+#### baseUrl - String
+
+The `baseUrl` option is optional and is for validation/security purposes. It will ensure that the value stored inside the return url is not pointing
+to a different website. For example, if your website is hosted on https://www.somedomain.com/, all return urls should begin
+with this value. That is to say, they should be relative to https://www.somedomain.com/.
+
+```js
+var deep     = require('express-deep-link');
+var deeplink = deep({ baseUrl : 'https://my.site.com/blah' });
+var express  = require('express');
+var app      = express();
+
+app.use(deeplink);
+```
+
+#### cookie - Object
+
+The `cookie` option can be used to override settings for how the return url is persisted as a cookie.
+
+##### cookie.name - String
+
+Controls the name of the cookie on the response.
+
+Default - `returnUrl`
+
+```js
+var deep     = require('express-deep-link');
+var deeplink = deep({ cookie : { name : 'BLAH' } });
+var express  = require('express');
+var app      = express();
+
+app.use(deeplink);
+```
+
+##### cookie.options - Object
+
+A hash of options that should conform to that of [`res.cookie`](http://expressjs.com/api.html#res.cookie).
+
+Default - `{ httpOnly : true }`
+
+```js
+var deep     = require('express-deep-link');
+var deeplink = deep({
+  cookie : {
+    options : {
+      domain: '.example.com',
+      path: '/admin',
+      secure: true,
+      expires: new Date(Date.now() + 900000)
+      // httpOnly : true would not be necessary here since
+      // it's apart of the default options
+    }
+  }
+});
+var express  = require('express');
+var app      = express();
+
+app.use(deeplink);
+```
+
+#### login - String|Function
+
 ### Where Do I Plug This Into Pipeline At?
 
 The expectation is that you'll use this middleware directly after your authentication middleware. Notice how the
