@@ -116,7 +116,7 @@ Let me give you an example.
 ```js
 // middleware/authentication.js
 
-Authentication = require('../lib/authentication');
+var Authentication = require('../lib/authentication');
 
 function(req, res, next) {
   var token = req.get('X-AUTH-TOKEN');
