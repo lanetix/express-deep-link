@@ -22,14 +22,19 @@ function(req, res, next) {
   var token = req.get('X-AUTH-TOKEN');
 
   if(!token) {
-    next(); // instead of redirecting to login, give the deeplinking middleware a chance
-            // to store the current request url, and THEN redirect to login via the login option
+    /* instead of redirecting to login, give the
+    *  deeplinking middleware a chance to store the
+    *  current request url, and THEN redirect to login
+    *  via the login option
+    */
+    next();
   }
 
   Authentication
   .authenticate(token)
   .then(function(tokenOrWhateverAuthYields) {
-    req.user = tokenOrWhateverAuthYields; // we can now pass this in as the authentication option
+    // we can now pass this in as the authentication option
+    req.user = tokenOrWhateverAuthYields;
     next();
   })
   .error(function(e) {
@@ -45,8 +50,12 @@ var authentication = require('./middleware/authentication')();
 var deep           = require('express-deep-link');
 var express        = require('express');
 
-var deeplink       = deep({ authenticated : function() { return req.user; }, login : 'https://secure.login.com' });
-var app            = express();
+var deeplink = deep({
+  authenticated : function() { return req.user; },
+  login         : 'https://secure.login.com'
+});
+
+var app = express();
 
 // when authentication calls next(), req.user will be populated,
 // and if it's not, deeplink will cache the current url and redirect to login
