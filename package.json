@@ -1,0 +1,33 @@
+{
+  "name": "express-deep-link",
+  "version": "0.0.1",
+  "description": "Provides deep linking capabilities via express middleware.",
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com:armw4/express-deep-link.git"
+  },
+  "keywords": [
+    "deep",
+    "link",
+    "express",
+    "middleware"
+  ],
+  "author": "@armw4",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/armw4/express-deep-link/issues"
+  },
+  "homepage": "https://github.com/armw4/express-deep-link",
+  "dependencies": {
+    "gulp": "^3.8.11",
+    "lodash": "^3.9.3"
+  },
+  "devDependencies": {
+    "gulp-jasmine": "^2.0.1",
+    "sinon": "^1.14.1"
+  }
+}
