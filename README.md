@@ -62,7 +62,7 @@ app.use(deeplink);
 
 #### login - String|Function
 
-### Where Do I Plug This Into Pipeline At?
+### Where Do I Plug This Into My Pipeline At?
 
 The expectation is that you'll use this middleware directly after your authentication middleware. Notice how the
 `authenticated` option is synchronous. I initially thought I'd need to account for promises of async based stuff
