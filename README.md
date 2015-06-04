@@ -63,6 +63,40 @@ app.use(deeplink);
 
 #### login - String|Function
 
+The `login` option is responsible for logging in an unauthenticated user. `String` and `Function` are supported.
+
+##### String
+
+If `login` is a string, redirection will be handled internally via `deeplink`.
+
+```js
+var deep     = require('express-deep-link');
+var deeplink = deep({ login : 'https://my.secure.site.com/auth' });
+var express  = require('express');
+var app      = express();
+
+app.use(deeplink);
+```
+
+##### Function
+
+If `login` is a function, that function will be invoked with the current response and will be responsible for redirecting the user.
+
+```js
+var deep     = require('express-deep-link');
+var deeplink = deep({
+  login : function(res) {
+    // do something funky before the redirect
+    res.redirect('some funky friggin place mang');
+  }
+});
+
+var express  = require('express');
+var app      = express();
+
+app.use(deeplink);
+```
+
 ### Where Do I Plug This Into My Pipeline At?
 ---------------------------------------------
 
@@ -128,4 +162,3 @@ var app = express();
 app.use(authentication);
 app.use(deeplink);
 ```
-Deep linking middleware for express.
