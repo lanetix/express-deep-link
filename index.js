@@ -9,7 +9,11 @@ module.exports = function(options) {
   loginIsValid           = options.login && ((_.isString(options.login) && options.login.length) || _.isFunction(options.login));
 
   if(!loginIsValid) {
-    throw new Error('login must be a string or function');
+    throw new Error('the login option must be a string or function');
+  }
+
+  if (!options.authenticated) {
+    throw new Error('the authenticated option must be provided as a function');
   }
 
   return function(req, res, next) {

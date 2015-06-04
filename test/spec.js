@@ -17,34 +17,48 @@ describe('deep linking middleware', function() {
     cookie        = sinon.spy();
   });
 
+  describe('when accessing the authenticated option', function() {
+    describe('when the authenticated option is falsy', function() {
+      it('should result in an exception being thrown', function() {
+        expect(function() { index({ login : '/login' }); }).toThrow();
+      });
+    });
+
+    describe('when authenticated is truthy', function() {
+      it('should not trigger an exception', function() {
+        expect(function() { index({ authenticated : authenticated, login : '/login' }); }).not.toThrow();
+      });
+    });
+  });
+
   describe('when accessing the login option', function() {
     describe('when the login option is falsy', function() {
       it('should result in an exception being thrown', function() {
-        expect(function() { index({ login : undefined }); }).toThrow();
+        expect(function() { index({ authenticated : authenticated, login : undefined }); }).toThrow();
       });
     });
 
     describe('when the login option is an empty string', function() {
       it('should result in an exception being thrown', function() {
-        expect(function() { index({ login : '' }); }).toThrow();
+        expect(function() { index({ authenticated : authenticated, login : '' }); }).toThrow();
       });
     });
 
     describe('when the login option is not a string or function', function() {
       it('should result in an exception being thrown', function() {
-        expect(function() { index({ login : 2 }); }).toThrow();
+        expect(function() { index({ authenticated : authenticated, login : 2 }); }).toThrow();
       });
     });
 
     describe('when the login option is a string', function() {
       it('should not trigger an exception', function() {
-        expect(function() { index({ login : '/logout' }); }).not.toThrow();
+        expect(function() { index({ authenticated : authenticated, login : '/logout' }); }).not.toThrow();
       });
     });
 
     describe('when the login option is a function', function() {
       it('should not trigger an exception', function() {
-        expect(function() { index({ login : sinon.spy() }); }).not.toThrow();
+        expect(function() { index({ authenticated : authenticated, login : sinon.spy() }); }).not.toThrow();
       });
     });
   });
