@@ -265,7 +265,11 @@ describe('deep linking middleware', function() {
 
     describe('when a return url is not present', function() {
       beforeEach(function() {
-        req = request();
+        req = request({ path : '/foreign' });
+        middleware = index({
+          authenticated : authenticated,
+          login : { local : { path : '/login', authenticated : { home : true } } }
+        });
       });
 
       it('should not redirect', function() {
@@ -286,7 +290,7 @@ describe('deep linking middleware', function() {
     beforeEach(function() {
       authenticated.returns(false);
 
-      req   = request({ originalUrl : 'https://www.google.com' });
+      req   = request({ path : '/wal-mar', originalUrl : 'https://www.google.com' });
       res   = response({ cookie : cookie, redirect : redirect });
     });
 
@@ -322,53 +326,54 @@ describe('deep linking middleware', function() {
       });
     });
 
-    describe('when the path of the current request matches the login.local.path option', function() {
+    describe('when the login.local.path option is present', function () {
       beforeEach(function() {
-        req        = request({ path : '/login' });
         middleware = index({
           authenticated : authenticated,
           login : { local: { path : '/login' }  }
         });
       });
 
-      it('should not redirect to any path or url', function () {
-        middleware(req, res, next);
+      describe('when the path of the current request matches the login.local.path option', function() {
+        beforeEach(function() {
+          req = request({ path : '/login' });
+        });
 
-        expect(redirect.called).toBe(false);
-      });
+        it('should not redirect to any path or url', function () {
+          middleware(req, res, next);
 
-      it('should not create a uri encoded return url', function() {
-        middleware(req, res, next);
+          expect(redirect.called).toBe(false);
+        });
 
-        expect(cookie.called).toBe(false);
-      });
+        it('should not create a uri encoded return url', function() {
+          middleware(req, res, next);
 
-      it('should invoke the next middleware in the pipeline, and allow the login page to be served w/o an infinite redirect', function() {
-        middleware(req, res, next);
+          expect(cookie.called).toBe(false);
+        });
 
-        expect(cookie.called).toBe(false);
-      });
-    });
+        it('should invoke the next middleware in the pipeline, and allow the login page to be served w/o an infinite redirect', function() {
+          middleware(req, res, next);
 
-    describe('when the path of the current request does not match the login.local.path option', function() {
-      beforeEach(function() {
-        req        = request({ path : 'login' });
-        middleware = index({
-          authenticated : authenticated,
-          login : { local: { path : '/login' } }
+          expect(cookie.called).toBe(false);
         });
       });
 
-      it('should not invoke the next middleware in the pipeline', function() {
-        middleware(req, res, next);
+      describe('when the path of the current request does not match the login.local.path option', function() {
+        beforeEach(function() {
+          req        = request({ path : 'login' });
+        });
 
-        expect(next.called).toBe(false);
-      });
+        it('should not invoke the next middleware in the pipeline', function() {
+          middleware(req, res, next);
 
-      it('should redirect to the login.local.path option', function () {
-        middleware(req, res, next);
+          expect(next.called).toBe(false);
+        });
 
-        expect(redirect.calledWithExactly('/login')).toBe(true);
+        it('should redirect to the login.local.path option', function () {
+          middleware(req, res, next);
+
+          expect(redirect.calledWithExactly('/login')).toBe(true);
+        });
       });
     });
   });
