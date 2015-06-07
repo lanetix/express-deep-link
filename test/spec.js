@@ -150,6 +150,41 @@ describe('deep linking middleware', function() {
       });
     });
 
+    describe('when a return url is present and the cookie.name option is present', function() {
+      beforeEach(function() {
+        returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
+        req        = request({ cookies : { 'BLAH' : returnUrl }, path : '/home' });
+        middleware = index({
+          authenticated : authenticated,
+          cookie: { name : 'BLAH' },
+          login : { local : { path : '/login', authenticated : { home : true } } }
+        });
+      });
+
+      it('should purge the return url from the response using the name of the cookie provided by the cookie option', function() {
+        middleware(req, res, next);
+
+        expect(clearCookie.calledWithExactly('BLAH')).toBe(true);
+      });
+    });
+
+    describe('when a return url is present and the cookie.name option is not present', function() {
+      beforeEach(function() {
+        returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
+        req        = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
+        middleware = index({
+          authenticated : authenticated,
+          login : { local : { path : '/login', authenticated : { home : true  } } }
+        });
+      });
+
+      it('should purge the return url from the response using the default cookie name', function() {
+        middleware(req, res, next);
+
+        expect(clearCookie.calledWithExactly('returnUrl')).toBe(true);
+      });
+    });
+
     describe('when no baseUrl option is present', function() {
       beforeEach(function() {
         returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
@@ -160,45 +195,13 @@ describe('deep linking middleware', function() {
         });
       });
 
-      describe('when the cookie.name option is present', function() {
-        beforeEach(function() {
-          req        = request({ cookies : { 'BLAH' : returnUrl }, path : '/home' });
-          middleware = index({
-            authenticated : authenticated,
-            cookie: { name : 'BLAH' },
-            login : { local : { path : '/login', authenticated : { home : true } } }
-          });
-        });
-
-        it('should purge the return url from the response using the name of the cookie provided by the cookie option', function() {
-          middleware(req, res, next);
-
-          expect(clearCookie.calledWithExactly('BLAH')).toBe(true);
-        });
-      });
-
-      describe('when the cookie.name option is not present', function() {
-        beforeEach(function() {
-          middleware = index({
-            authenticated : authenticated,
-            login : { local : { path : '/login', authenticated : { home : true  } } }
-          });
-        });
-
-        it('should purge the return url from the response using the default cookie name', function() {
-          middleware(req, res, next);
-
-          expect(clearCookie.calledWithExactly('returnUrl')).toBe(true);
-        });
-      });
-
       it('should not invoke the next middleware in the pipeline', function() {
         middleware(req, res, next);
 
         expect(next.called).toBe(false);
       });
 
-      it('should redirect to the return url', function() {
+      it('should redirect to the return url without verifying that the return url is relative to any particular url', function() {
         middleware(req, res, next);
 
         expect(redirect.calledWithExactly('http://i.hack.you.com/via/xss')).toBe(true);
@@ -220,40 +223,6 @@ describe('deep linking middleware', function() {
         beforeEach(function() {
           returnUrl = encodeURIComponent(url.resolve(BASE_URL, 'the/booty-butt-naked/truth'));
           req       = request({ cookies : { returnUrl : returnUrl } });
-        });
-
-        describe('when the cookie.name option is present', function() {
-          beforeEach(function() {
-            req        = request({ cookies : { 'BLAH' : returnUrl } });
-            middleware = index({
-              authenticated : authenticated,
-              cookie : { name : 'BLAH' },
-              login : { local : { path : '/login', authenticated : { home : true } } },
-              baseUrl : BASE_URL
-            });
-          });
-
-          it('should purge the return url from the response using the name of the cookie provided by the cookie option', function() {
-            middleware(req, res, next);
-
-            expect(clearCookie.calledWithExactly('BLAH')).toBe(true);
-          });
-        });
-
-        describe('when the cookie.name option is not present', function() {
-          beforeEach(function() {
-            middleware = index({
-              authenticated : authenticated,
-              login : { local : { path : '/login', authenticated : { home : true } } },
-              baseUrl : BASE_URL
-            });
-          });
-
-          it('should purge the return url from the response using the default cookie name', function() {
-            middleware(req, res, next);
-
-            expect(clearCookie.calledWithExactly('returnUrl')).toBe(true);
-          });
         });
 
         it('should not invoke the next middleware in the pipeline', function() {
@@ -282,6 +251,10 @@ describe('deep linking middleware', function() {
           try { middleware(req, res, next); } catch(e) { }
 
           expect(redirect.called).toBe(false);
+        });
+
+        it('should not invoke the next middleware in the pipeline', function() {
+          expect(next.called).toBe(false);
         });
 
         it('should result in an exception being thrown', function() {
