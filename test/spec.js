@@ -5,9 +5,9 @@ var sinon    = require('sinon');
 var url      = require('url');
 
 describe('deep linking middleware', function() {
-  var req, res, cookieOptions, next, login, cookie, middleware, authenticated,
+  var req, res, cookieOptions, next, cookie, middleware, authenticated,
       redirect, clearCookie, BASE_URL = 'https://localhost:3000', DEFAULT_COOKIE_OPTIONS = { httpOnly : true },
-      returnUrl;
+      returnUrl, localLoginOptions;
 
   beforeEach(function() {
     authenticated = sinon.stub();
@@ -26,7 +26,7 @@ describe('deep linking middleware', function() {
 
     describe('when authenticated is truthy', function() {
       it('should not trigger an exception', function() {
-        expect(function() { index({ authenticated : authenticated, login : '/login' }); }).not.toThrow();
+        expect(function() { index({ authenticated : authenticated, login : { local : {  path : '/login'  } } }); }).not.toThrow();
       });
     });
   });
@@ -38,27 +38,9 @@ describe('deep linking middleware', function() {
       });
     });
 
-    describe('when the login option is an empty string', function() {
+    describe('when neither the login.remote or login.local options are present', function() {
       it('should result in an exception being thrown', function() {
         expect(function() { index({ authenticated : authenticated, login : '' }); }).toThrow();
-      });
-    });
-
-    describe('when the login option is not a string or function', function() {
-      it('should result in an exception being thrown', function() {
-        expect(function() { index({ authenticated : authenticated, login : 2 }); }).toThrow();
-      });
-    });
-
-    describe('when the login option is a string', function() {
-      it('should not trigger an exception', function() {
-        expect(function() { index({ authenticated : authenticated, login : '/logout' }); }).not.toThrow();
-      });
-    });
-
-    describe('when the login option is a function', function() {
-      it('should not trigger an exception', function() {
-        expect(function() { index({ authenticated : authenticated, login : sinon.spy() }); }).not.toThrow();
       });
     });
   });
@@ -70,17 +52,122 @@ describe('deep linking middleware', function() {
       res = response({ redirect : redirect, clearCookie: clearCookie });
     });
 
+    describe('when there is not return url, and the request path is equal to the login.local.path option', function() {
+      beforeEach(function() {
+        localLoginOptions = { local : { path : '/login', authenticated : {} } };
+        middleware        = index({ authenticated : authenticated, login : localLoginOptions  });
+        req               = request({ path : '/login' });
+      });
+
+      describe('when the login.local.authenticated.home option is a string', function() {
+        beforeEach(function() {
+          localLoginOptions.local.authenticated.home = '/my/home/route';
+        });
+
+        it('should not invoke the next middleware in the pipeline', function() {
+          middleware(req, res, next);
+
+          expect(next.called).toBe(false);
+        });
+
+        it('should prevent the login page from being served to authenticated users and redirect to the login.local.authenticated.home option', function() {
+          middleware(req, res, next);
+
+          expect(redirect.calledWithExactly('/my/home/route')).toBe(true);
+        });
+      });
+
+      describe('when the login.local.authenticated.home option is truthy', function() {
+        beforeEach(function() {
+          localLoginOptions.local.authenticated.home = true;
+        });
+
+        it('should not invoke the next middleware in the pipeline', function() {
+          middleware(req, res, next);
+
+          expect(next.called).toBe(false);
+        });
+
+        it('should prevent the login page from being served to authenticated users and redirect to the / (root) url', function() {
+          middleware(req, res, next);
+
+          expect(redirect.calledWithExactly('/')).toBe(true);
+        });
+      });
+
+      describe('when the login.local.authenticated.home option is falsy', function() {
+        beforeEach(function() {
+          localLoginOptions.local.authenticated.home = null;
+        });
+
+        it('should not redirect', function() {
+          middleware(req, res, next);
+
+          expect(redirect.called).toBe(false);
+        });
+
+        it('should invoke the next middleware in the pipeline and allow the login page to be potentially served to authenticated users', function() {
+          middleware(req, res, next);
+
+          expect(next.calledOnce).toBe(true);
+        });
+      });
+
+      describe('when the login.local.authenticated option is not present', function() {
+        beforeEach(function() {
+          delete localLoginOptions.local.authenticated;
+        });
+
+        it('should not redirect', function() {
+          middleware(req, res, next);
+
+          expect(redirect.called).toBe(false);
+        });
+
+        it('should invoke the next middleware in the pipeline and allow the login page to be potentially served to authenticated users', function() {
+          middleware(req, res, next);
+
+          expect(next.calledOnce).toBe(true);
+        });
+      });
+
+      describe('when the login.local.authenticated.home option is not present', function() {
+        beforeEach(function() {
+          delete localLoginOptions.local.authenticated.home;
+        });
+
+        it('should not redirect', function() {
+          middleware(req, res, next);
+
+          expect(redirect.called).toBe(false);
+        });
+
+        it('should invoke the next middleware in the pipeline and allow the login page to be potentially served to authenticated users', function() {
+          middleware(req, res, next);
+
+          expect(next.calledOnce).toBe(true);
+        });
+      });
+    });
+
     describe('when no baseUrl option is present', function() {
       beforeEach(function() {
-        middleware = index({ authenticated : authenticated, login : '/login' });
         returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
-        req        = request({ cookies : { returnUrl : returnUrl } });
+        req        = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
+        middleware = index({
+          authenticated : authenticated,
+          login : { local : { path : '/login', authenticated : { home : true } } }
+        });
       });
 
       describe('when the cookie.name option is present', function() {
         beforeEach(function() {
-          req        = request({ cookies : { 'BLAH' : returnUrl } });
-          middleware = index({ authenticated : authenticated, cookie: { name : 'BLAH' }, login : '/login' });
+          req        = request({ cookies : { 'BLAH' : returnUrl }, path : '/home' });
+          middleware = index({
+            authenticated : authenticated,
+            cookie: { name : 'BLAH' },
+            login : { local : { path : '/login', authenticated : { home : true } } }
+          });
         });
 
         it('should purge the return url from the response using the name of the cookie provided by the cookie option', function() {
@@ -92,7 +179,10 @@ describe('deep linking middleware', function() {
 
       describe('when the cookie.name option is not present', function() {
         beforeEach(function() {
-          middleware = index({ authenticated : authenticated, login : '/login' });
+          middleware = index({
+            authenticated : authenticated,
+            login : { local : { path : '/login', authenticated : { home : true  } } }
+          });
         });
 
         it('should purge the return url from the response using the default cookie name', function() {
@@ -103,6 +193,8 @@ describe('deep linking middleware', function() {
       });
 
       it('should not invoke the next middleware in the pipeline', function() {
+        middleware(req, res, next);
+
         expect(next.called).toBe(false);
       });
 
@@ -114,6 +206,16 @@ describe('deep linking middleware', function() {
     });
 
     describe('when the baseUrl option is present', function() {
+      beforeEach(function() {
+        returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
+        req        = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
+        middleware = index({
+          authenticated : authenticated,
+          login : { local : { path : '/login', authenticated : { home : true } } },
+          baseUrl : BASE_URL
+        });
+      });
+
       describe('when a return url that is relative to the baseUrl option is present', function() {
         beforeEach(function() {
           returnUrl = encodeURIComponent(url.resolve(BASE_URL, 'the/booty-butt-naked/truth'));
@@ -123,7 +225,12 @@ describe('deep linking middleware', function() {
         describe('when the cookie.name option is present', function() {
           beforeEach(function() {
             req        = request({ cookies : { 'BLAH' : returnUrl } });
-            middleware = index({ authenticated : authenticated, cookie: { name : 'BLAH' }, login : '/login' });
+            middleware = index({
+              authenticated : authenticated,
+              cookie : { name : 'BLAH' },
+              login : { local : { path : '/login', authenticated : { home : true } } },
+              baseUrl : BASE_URL
+            });
           });
 
           it('should purge the return url from the response using the name of the cookie provided by the cookie option', function() {
@@ -135,7 +242,11 @@ describe('deep linking middleware', function() {
 
         describe('when the cookie.name option is not present', function() {
           beforeEach(function() {
-            middleware = index({ authenticated : authenticated, login : '/login' });
+            middleware = index({
+              authenticated : authenticated,
+              login : { local : { path : '/login', authenticated : { home : true } } },
+              baseUrl : BASE_URL
+            });
           });
 
           it('should purge the return url from the response using the default cookie name', function() {
@@ -160,11 +271,11 @@ describe('deep linking middleware', function() {
         beforeEach(function() {
           returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
           req        = request({ cookies : { returnUrl : returnUrl } });
-          middleware = index({ authenticated : authenticated, baseUrl : BASE_URL, login : '/login' });
-        });
-
-        it('should result in an exception being thrown', function() {
-          expect(function() { middleware(req, res, next); }).toThrow();
+          middleware = index({
+            authenticated : authenticated,
+            baseUrl : BASE_URL,
+            login : { local : { path : '/login', authenticated : { home : true } } }
+          });
         });
 
         it('should not redirect to the invalid return url', function() {
@@ -172,12 +283,22 @@ describe('deep linking middleware', function() {
 
           expect(redirect.called).toBe(false);
         });
+
+        it('should result in an exception being thrown', function() {
+          expect(function() { middleware(req, res, next); }).toThrow();
+        });
       });
     });
 
     describe('when a return url is not present', function() {
       beforeEach(function() {
         req = request();
+      });
+
+      it('should not redirect', function() {
+        middleware(req, res, next);
+
+        expect(redirect.called).toBe(false);
       });
 
       it('should invoke the next middleware in the pipeline', function() {
@@ -192,15 +313,18 @@ describe('deep linking middleware', function() {
     beforeEach(function() {
       authenticated.returns(false);
 
-      login = sinon.spy();
       req   = request({ originalUrl : 'https://www.google.com' });
       res   = response({ cookie : cookie, redirect : redirect });
     });
 
-    describe('when the cookie option is present', function() {
+    describe('when the cookie option is present (irrespective of the local or remote options)', function() {
       beforeEach(function() {
         cookieOptions = { secure : true, httpOnly : false };
-        middleware    = index({ authenticated : authenticated, cookie : { name : 'BLAH', options : cookieOptions }, login : '/logout' });
+        middleware    = index({
+          authenticated : authenticated,
+          cookie : { name : 'BLAH', options : cookieOptions },
+          login : { local : { path : '/login' } }
+        });
       });
 
       it('should create a uri encoded return url using the original url of the request and allow the default cookie settings to be overriden', function() {
@@ -210,9 +334,12 @@ describe('deep linking middleware', function() {
       });
     });
 
-    describe('when the cookie option is not present', function() {
+    describe('when the cookie option is not present (irrespective of the login.local or login.remote options)', function() {
       beforeEach(function() {
-        middleware = index({ authenticated : authenticated, login : '/logout' });
+        middleware = index({
+          authenticated : authenticated,
+          login : { local : { path : '/login' } }
+        });
       });
 
       it('should create a uri encoded return url using the original url of the request and the default cookie settings', function() {
@@ -222,27 +349,53 @@ describe('deep linking middleware', function() {
       });
     });
 
-    describe('when the login option is a function', function() {
+    describe('when the path of the current request matches the login.local.path option', function() {
       beforeEach(function() {
-        middleware = index({ authenticated : authenticated, login : login });
+        req        = request({ path : '/login' });
+        middleware = index({
+          authenticated : authenticated,
+          login : { local: { path : '/login' }  }
+        });
       });
 
-      it('should invoke the function provided by the login option passing in the response as input', function() {
+      it('should not redirect to any path or url', function () {
         middleware(req, res, next);
 
-        expect(login.calledWithExactly(res)).toBe(true);
+        expect(redirect.called).toBe(false);
+      });
+
+      it('should not create a uri encoded return url', function() {
+        middleware(req, res, next);
+
+        expect(cookie.called).toBe(false);
+      });
+
+      it('should invoke the next middleware in the pipeline, and allow the login page to be served w/o an infinite redirect', function() {
+        middleware(req, res, next);
+
+        expect(cookie.called).toBe(false);
       });
     });
 
-    describe('when the login option is a string', function() {
+    describe('when the path of the current request does not match the login.local.path option', function() {
       beforeEach(function() {
-        middleware = index({ authenticated : authenticated, login : 'https://login.my.secure.site.com/' });
+        req        = request({ path : 'login' });
+        middleware = index({
+          authenticated : authenticated,
+          login : { local: { path : '/login' } }
+        });
       });
 
-      it('should redirect to the value provided by the login option', function() {
+      it('should not invoke the next middleware in the pipeline', function() {
         middleware(req, res, next);
 
-        expect(redirect.calledWithExactly('https://login.my.secure.site.com/')).toBe(true);
+        expect(next.called).toBe(false);
+      });
+
+      it('should redirect to the login.local.path option', function () {
+        middleware(req, res, next);
+
+        expect(redirect.calledWithExactly('/login')).toBe(true);
       });
     });
   });

@@ -5,5 +5,6 @@ module.exports = function(options) {
     authenticated : !!opts.authenticated,
     cookies       : opts.cookies || {},
     originalUrl   : opts.originalUrl,
+    path          : opts.path
   };
 };
