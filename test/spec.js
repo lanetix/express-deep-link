@@ -52,7 +52,7 @@ describe('deep linking middleware', function() {
       res = response({ redirect : redirect, clearCookie: clearCookie });
     });
 
-    describe('when there is not return url, and the request path is equal to the login.local.path option', function() {
+    describe('when there is no return url, and the request path is equal to the login.local.path option', function() {
       beforeEach(function() {
         localLoginOptions = { local : { path : '/login', authenticated : {} } };
         middleware        = index({ authenticated : authenticated, login : localLoginOptions  });
@@ -276,6 +276,12 @@ describe('deep linking middleware', function() {
         middleware(req, res, next);
 
         expect(redirect.called).toBe(false);
+      });
+
+      it('should not purge the non existent return url from the response', function() {
+        middleware(req, res, next);
+
+        expect(clearCookie.called).toBe(false);
       });
 
       it('should invoke the next middleware in the pipeline', function() {
