@@ -296,7 +296,7 @@ describe('deep linking middleware', function() {
     beforeEach(function() {
       authenticated.returns(false);
 
-      req   = request({ path : '/wal-mar', originalUrl : 'https://www.google.com' });
+      req   = request({ path : '/wal-mart', originalUrl : 'https://www.google.com' });
       res   = response({ cookie : cookie, redirect : redirect });
     });
 
@@ -330,6 +330,27 @@ describe('deep linking middleware', function() {
 
         expect(cookie.calledWithExactly('returnUrl', 'https%3A%2F%2Fwww.google.com', DEFAULT_COOKIE_OPTIONS)).toBe(true);
       });
+    });
+
+    describe('when the login.remote.url option is present', function() {
+        beforeEach(function() {
+          middleware = index({
+            authenticated : authenticated,
+            login : { remote : { url : 'https://my.secure.site.com/' }  }
+          });
+        });
+
+        it('should not invoke the next middleware in the pipeline', function() {
+          middleware(req, res, next);
+
+          expect(next.called).toBe(false);
+        });
+
+        it('should redirect to the login.remote.url option', function () {
+          middleware(req, res, next);
+
+          expect(redirect.calledWithExactly('https://my.secure.site.com/')).toBe(true);
+        });
     });
 
     describe('when the login.local.path option is present', function () {
@@ -366,7 +387,7 @@ describe('deep linking middleware', function() {
 
       describe('when the path of the current request does not match the login.local.path option', function() {
         beforeEach(function() {
-          req        = request({ path : 'login' });
+          req = request({ path : 'login' });
         });
 
         it('should not invoke the next middleware in the pipeline', function() {
