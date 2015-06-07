@@ -296,7 +296,7 @@ describe('deep linking middleware', function() {
     beforeEach(function() {
       authenticated.returns(false);
 
-      req   = request({ path : '/wal-mart', originalUrl : 'https://www.google.com' });
+      req   = request({ path : '/wal-mart', originalUrl : '/search?q=something' });
       res   = response({ cookie : cookie, redirect : redirect });
     });
 
@@ -313,7 +313,7 @@ describe('deep linking middleware', function() {
       it('should create a uri encoded return url using the original url of the request and allow the default cookie settings to be overriden', function() {
         middleware(req, res, next);
 
-        expect(cookie.calledWithExactly('BLAH', 'https%3A%2F%2Fwww.google.com', cookieOptions)).toBe(true);
+        expect(cookie.calledWithExactly('BLAH', '%2Fsearch%3Fq%3Dsomething', cookieOptions)).toBe(true);
       });
     });
 
@@ -328,7 +328,7 @@ describe('deep linking middleware', function() {
       it('should create a uri encoded return url using the original url of the request and the default cookie settings', function() {
         middleware(req, res, next);
 
-        expect(cookie.calledWithExactly('returnUrl', 'https%3A%2F%2Fwww.google.com', DEFAULT_COOKIE_OPTIONS)).toBe(true);
+        expect(cookie.calledWithExactly('returnUrl', '%2Fsearch%3Fq%3Dsomething', DEFAULT_COOKIE_OPTIONS)).toBe(true);
       });
     });
 
