@@ -107,8 +107,8 @@ Controls options related to local authenticated requests.
 
 The `login.local.authenticated.home` option is a UX enhancement that prevents authenticated users from being allowed
 to visit the login route (`login.local.path`). When this option is set, authenticated users will get redirected to the
-`/` (root) url when the value of `home` is a Boolean (true), or to the value of the `home` option when it is of type
-String.
+`/` (root) url when the value of `home` is a `Boolean` (true), or to the value of the `home` option when it is of type
+`String`.
 
 ```js
 var deep     = require('express-deep-link');
