@@ -1,7 +1,8 @@
 var _ = require('lodash');
 
 function validateOptions(options) {
-  var remoteAndRemoteLoginAreNotMutuallyExclusive = options.login && options.login.local && options.login.remote;
+  var remoteAndRemoteLoginAreNotMutuallyExclusive = options.login && options.login.local && options.login.remote,
+      loginUrl;
 
   if (!options.login) {
     throw new Error('the login option is required.');
@@ -25,8 +26,6 @@ function validateOptions(options) {
     if (!options.login.remote.url) {
       throw new Error('the login.remote.url option must be provided.');
     }
-
-    loginUrl = options.login.remote.url;
   } else {
     throw new Error('either the login.local or login.remote option must be provivded.');
   }
@@ -36,16 +35,41 @@ function validateOptions(options) {
   }
 }
 
-module.exports = function(options) {
-  var returnUrl, cookieOptions, returnUrlIsRelativeToBaseUrl, authenticated,
-      cookieName, remoteAndRemoteLoginAreMutuallyExclusive, loginUrl,
-      DEFAULT_COOKIE_OPTIONS, redirectRequestsToTheLocalLoginRouteToHome,
-      localLoginRouteRequested;
+function processAuthenticatedRequest(req, res, next, options) {
+  var cookieName                                 = (options.cookie && options.cookie.name) || 'returnUrl',
+      returnUrl                                  = req.cookies[cookieName], returnUrlIsRelativeToBaseUrl,
+      redirectRequestsToTheLocalLoginRouteToHome = options.login.local && req.path === options.login.local.path
+                                                  && options.login.local.authenticated && options.login.local.authenticated.home;
 
-  DEFAULT_COOKIE_OPTIONS = { httpOnly : true };
-  cookieName             = (options.cookie && options.cookie.name) || 'returnUrl';
+  if (returnUrl) {
+    returnUrl = decodeURIComponent(returnUrl);
 
-  validateOptions(options);
+    if (options.baseUrl) {
+      returnUrlIsRelativeToBaseUrl = returnUrl.indexOf(options.baseUrl) === 0;
+
+      if (!returnUrlIsRelativeToBaseUrl) {
+        throw new Error('returnUrl must be relative to baseUrl.');
+      }
+    }
+
+    res.clearCookie(cookieName);
+    res.redirect(returnUrl);
+  } else if (redirectRequestsToTheLocalLoginRouteToHome) {
+    if (_.isString(options.login.local.authenticated.home)) {
+      res.redirect(options.login.local.authenticated.home);
+    } else {
+      res.redirect('/');
+    }
+  } else {
+    next();
+  }
+}
+
+function processUnAuthenticatedRequest(req, res, next, options) {
+  var cookieName             = (options.cookie && options.cookie.name) || 'returnUrl',
+    localLoginRouteRequested = options.login.local && req.path === options.login.local.path,
+    DEFAULT_COOKIE_OPTIONS   = { httpOnly : true },
+    loginUrl, cookieOptions;
 
   if (options.login.local) {
     loginUrl = options.login.local.path;
@@ -53,48 +77,29 @@ module.exports = function(options) {
     loginUrl = options.login.remote.url;
   }
 
+  if (localLoginRouteRequested) {
+    next();
+  } else {
+    cookieOptions = (options.cookie && options.cookie.options) || {};
+    cookieOptions = _.defaults(cookieOptions, DEFAULT_COOKIE_OPTIONS);
+
+    res.cookie(cookieName, encodeURIComponent(req.originalUrl), cookieOptions);
+    res.redirect(loginUrl);
+  }
+}
+
+module.exports = function(options) {
+  var authenticated;
+
+  validateOptions(options);
+
   return function(req, res, next) {
     authenticated = options.authenticated.call(undefined, req);
 
-    localLoginRouteRequested                   = options.login.local && req.path === options.login.local.path;
-    redirectRequestsToTheLocalLoginRouteToHome = options.login.local && req.path === options.login.local.path
-                                                  && options.login.local.authenticated && options.login.local.authenticated.home;
-
     if (authenticated) {
-      returnUrl = req.cookies[cookieName];
-
-      if (returnUrl) {
-        returnUrl = decodeURIComponent(returnUrl);
-
-        if (options.baseUrl) {
-          returnUrlIsRelativeToBaseUrl = returnUrl.indexOf(options.baseUrl) === 0;
-
-          if (!returnUrlIsRelativeToBaseUrl) {
-            throw new Error('returnUrl must be relative to baseUrl.');
-          }
-        }
-
-        res.clearCookie(cookieName);
-        res.redirect(returnUrl);
-      } else if (redirectRequestsToTheLocalLoginRouteToHome) {
-        if (_.isString(options.login.local.authenticated.home)) {
-          res.redirect(options.login.local.authenticated.home);
-        } else {
-          res.redirect('/');
-        }
-      } else {
-        next();
-      }
+      processAuthenticatedRequest(req, res, next, options);
     } else {
-      if (localLoginRouteRequested) {
-        next();
-      } else {
-        cookieOptions = (options.cookie && options.cookie.options) || {};
-        cookieOptions = _.defaults(cookieOptions, DEFAULT_COOKIE_OPTIONS);
-
-        res.cookie(cookieName, encodeURIComponent(req.originalUrl), cookieOptions);
-        res.redirect(loginUrl);
-      }
+      processUnAuthenticatedRequest(req, res, next, options);
     }
   };
 };
