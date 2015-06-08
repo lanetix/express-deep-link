@@ -1,14 +1,14 @@
 var _ = require('lodash');
 
 function validateOptions(options) {
-  var remoteAndRemoteLoginAreNotMutuallyExclusive = options.login && options.login.local && options.login.remote,
+  var localAndRemoteLoginAreBothProvided = options.login && options.login.local && options.login.remote,
       loginUrl;
 
   if (!options.login) {
     throw new Error('the login option is required.');
   }
 
-  if(remoteAndRemoteLoginAreNotMutuallyExclusive) {
+  if(localAndRemoteLoginAreBothProvided) {
     throw new Error('the login.local and login.remote options are mutually exclusive (exactly one should be provided).');
   }
 
