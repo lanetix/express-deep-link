@@ -65,7 +65,7 @@ function processAuthenticatedRequest(req, res, next, options) {
   }
 }
 
-function processUnAuthenticatedRequest(req, res, next, options) {
+function processUnauthenticatedRequest(req, res, next, options) {
   var cookieName             = (options.cookie && options.cookie.name) || 'returnUrl',
     localLoginRouteRequested = options.login.local && req.path === options.login.local.path,
     DEFAULT_COOKIE_OPTIONS   = { httpOnly : true },
@@ -99,7 +99,7 @@ module.exports = function(options) {
     if (authenticated) {
       processAuthenticatedRequest(req, res, next, options);
     } else {
-      processUnAuthenticatedRequest(req, res, next, options);
+      processUnauthenticatedRequest(req, res, next, options);
     }
   };
 };
