@@ -69,7 +69,7 @@ function processUnauthenticatedRequest(req, res, next, options) {
   var cookieName             = (options.cookie && options.cookie.name) || 'returnUrl',
     localLoginRouteRequested = options.login.local && req.path === options.login.local.path,
     DEFAULT_COOKIE_OPTIONS   = { httpOnly : true },
-    loginUrl, cookieOptions;
+    loginUrl;
 
   if (options.login.local) {
     loginUrl = options.login.local.path;
@@ -80,7 +80,8 @@ function processUnauthenticatedRequest(req, res, next, options) {
   if (localLoginRouteRequested) {
     next();
   } else {
-    cookieOptions = (options.cookie && options.cookie.options) || {};
+    var cookieOptions = (options.cookie && options.cookie.options) || {};
+
     cookieOptions = _.defaults(cookieOptions, DEFAULT_COOKIE_OPTIONS);
 
     res.cookie(cookieName, encodeURIComponent(req.originalUrl), cookieOptions);
