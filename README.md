@@ -3,7 +3,7 @@ Compatible with [express 4.x](http://expressjs.com/4x/api.html).
 ## Options
 -----------
 
-### baseUrl - String
+### baseUrl - String (Optional)
 
 The `baseUrl` option is optional and is for validation/security purposes. It will ensure that the value stored inside the return url is not pointing
 to a different website. For example, if your website is hosted on https://www.somedomain.com/, all return urls should begin
@@ -18,11 +18,11 @@ var app      = express();
 app.use(deeplink);
 ```
 
-### cookie - Object
+### cookie - Object (Optional)
 
 The `cookie` option can be used to override settings for how the return url is persisted as a cookie.
 
-#### cookie.name - String
+#### cookie.name - String (Optional)
 
 Controls the name of the cookie on the response.
 
@@ -37,7 +37,7 @@ var app      = express();
 app.use(deeplink);
 ```
 
-#### cookie.options - Object
+#### cookie.options - Object (Optional)
 
 A hash of options that should conform to that of [`res.cookie`](http://expressjs.com/api.html#res.cookie).
 
@@ -63,17 +63,20 @@ var app      = express();
 app.use(deeplink);
 ```
 
-### login - Object
+### login - Object (Required)
 
 The `login` option is responsible for logging in an unauthenticated user. It supports both local and remote
 login.
 
-#### login.local - Object
+**NOTE:** The `login.local` and `login.remote` options are mutually exclusive and you must set EXACTLY ONE of the options
+in order to use `deeplink`.
+
+#### login.local - Object (Required if not using login.remote)
 
 Instructs the middleware that the login endpoint is deployed to the same host/website (i.e. https://contoso.com/login) as
 the target website (where clients will deep link into) as opposed to a remote host (i.e. https://login.contoso.com).
 
-##### login.local.path - String
+##### login.local.path - String (Required if using login.local)
 
 This is the request path (equivalent to the `req.path` property of an express request) of the local login endpoint.
 **It should always begin with a forward `/`** as [depicted in the express docs](http://expressjs.com/api.html#req.path).
@@ -96,11 +99,11 @@ var app      = express();
 app.use(deeplink);
 ```
 
-##### login.local.authenticated - Object
+##### login.local.authenticated - Object (Optional)
 
 Controls options related to local authenticated requests.
 
-###### login.local.authenticated.home - Boolean|String
+###### login.local.authenticated.home - Boolean|String (Optional)
 
 The `login.local.authenticated.home` option is a UX enhancement that prevents authenticated users from being allowed
 to visit the login route (`login.local.path`). When this option is set, authenticated users will get redirected to the
@@ -141,12 +144,12 @@ var app      = express();
 app.use(deeplink);
 ```
 
-#### login.remote - Object
+#### login.remote - Object (Required if not using login.local)
 
 Instructs the middleware that the login endpoint is deployed to a remote (i.e. https://login.contoso.com) host/website as
 opposed to the target website (i.e. https://contoso.com/login).
 
-##### login.remote.url - String
+##### login.remote.url - String (Required if using login.remote)
 
 This is the remote endpoint we'll redirect any unauthenticated requests to. This is different from local configuration
 as no redirect will be necessary.
