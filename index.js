@@ -1,13 +1,7 @@
 var _ = require('lodash');
 
-module.exports = function(options) {
-  var returnUrl, cookieOptions, returnUrlIsRelativeToBaseUrl, authenticated,
-      cookieName, DEFAULT_COOKIE_OPTIONS , remoteAndRemoteLoginAreMutuallyExclusive,
-      loginUrl, preventLoginFromBeingServedToAuthenticatedUsers;
-
-  DEFAULT_COOKIE_OPTIONS                      = { httpOnly : true };
-  cookieName                                  = (options.cookie && options.cookie.name) || 'returnUrl';
-  remoteAndRemoteLoginAreNotMutuallyExclusive = options.login && options.login.local && options.login.remote;
+function validateOptions(options) {
+  var remoteAndRemoteLoginAreNotMutuallyExclusive = options.login && options.login.local && options.login.remote;
 
   if (!options.login) {
     throw new Error('the login option is required.');
@@ -39,6 +33,23 @@ module.exports = function(options) {
 
   if (!options.authenticated) {
     throw new Error('the authenticated option must be provided as a function.');
+  }
+}
+
+module.exports = function(options) {
+  var returnUrl, cookieOptions, returnUrlIsRelativeToBaseUrl, authenticated,
+      cookieName, remoteAndRemoteLoginAreMutuallyExclusive, loginUrl,
+      preventLoginFromBeingServedToAuthenticatedUsers, DEFAULT_COOKIE_OPTIONS;
+
+  DEFAULT_COOKIE_OPTIONS = { httpOnly : true };
+  cookieName             = (options.cookie && options.cookie.name) || 'returnUrl';
+
+  validateOptions(options);
+
+  if (options.login.local) {
+    loginUrl = options.login.local.path;
+  } else {
+    loginUrl = options.login.remote.url;
   }
 
   return function(req, res, next) {
