@@ -1,7 +1,24 @@
 Compatible with [express 4.x](http://expressjs.com/4x/api.html).
 
+## What is Deep Linking?
+
+Deep linking occurs when users accesses a url of arbitrary depth on your website. As noted on Wikipedia,
+it's the difference between www.my.site.com/ (the root of the website) and www.my.site.com/some-url/of/arbitrary/depth (a deep linked
+url). Deep linking is a given for public unauthenticated websites. There's nothing special you have to do in order to get it to work.
+However, once authentication comes into play, you'll need to know where an unauthenticated user was attempting to go after they've logged
+in to your website:
+
+1. Susie gets a link to you site from Brad (www.your.site.com/some/path/other-than/the-root-url)
+2. Susie clicks on this link
+3. Susie is not authenticated and gets redirected to login and prompted for her credentials
+4. Instead of getting blindly sent to the root of the website (/), Susie is sent to where she was initially attempting to go before she was prompted to login.
+
+That's the base use case for this middleware. Remember where a user was trying to go prior to logging in, and send them
+back to that place after the fact. Of course if a user just logs into your site and never issued a request while unauthenticated,
+it'll be business as usual.
+
 ## Options
------------
+----------
 
 ### baseUrl - String (Optional)
 
@@ -170,7 +187,7 @@ app.use(deeplink);
 ```
 
 ## Where Do I Plug This Into My Pipeline At?
----------------------------------------------
+--------------------------------------------
 
 The expectation is that you'll use this middleware directly after your authentication middleware. Notice how the
 `authenticated` option is synchronous. I initially thought I'd need to account for promises of async based stuff
@@ -236,7 +253,7 @@ app.use(deeplink);
 ```
 
 ## Tests
----------
+--------
 
 ```shell
 git clone git@github.com:armw4/express-deep-link.git
