@@ -32,7 +32,7 @@ describe('deep linking middleware', function() {
   });
 
   describe('when accessing the login option', function() {
-    describe('when the login option is falsy', function() {
+    describe('when the login option is not present', function() {
       it('should result in an exception being thrown', function() {
         expect(function() { index({ authenticated : authenticated, login : undefined }); }).toThrow();
       });
@@ -40,7 +40,43 @@ describe('deep linking middleware', function() {
 
     describe('when neither the login.remote or login.local options are present', function() {
       it('should result in an exception being thrown', function() {
-        expect(function() { index({ authenticated : authenticated, login : '' }); }).toThrow();
+        expect(function() { index({ authenticated : authenticated, login : {} }); }).toThrow();
+      });
+    });
+
+    describe('when both the login.remote and login.local options are present', function() {
+      it('should result in an exception being thrown', function() {
+        expect(function() { index({ authenticated : authenticated, login : { remote: {}, local : {} } }); }).toThrow();
+      });
+    });
+
+    describe('when the login.remote option is present but the login.remote.url option is not present', function() {
+      it('should result in an exception being thrown', function() {
+        expect(function() { index({ authenticated : authenticated, login : { remote: {} } }); }).toThrow();
+      });
+    });
+
+    describe('when the login.remote option is present and the login.remote.url option is present', function() {
+      it('should not result in an exception being thrown', function() {
+        expect(function() { index({ authenticated : authenticated, login : { remote: { url : 'https://www.hotwire.com' } } }); }).not.toThrow();
+      });
+    });
+
+    describe('when the login.local option is present but the login.local.path option is not present', function() {
+      it('should result in an exception being thrown', function() {
+        expect(function() { index({ authenticated : authenticated, login : { local : {} } }); }).toThrow();
+      });
+    });
+
+    describe('when the login.local option is present but the login.local.path does not begin with a forward slash', function() {
+      it('should result in an exception being thrown', function() {
+        expect(function() { index({ authenticated : authenticated, login : { local : { path : 'login' } } }); }).toThrow();
+      });
+    });
+
+    describe('when the login.local option is present and the login.local.path option is present', function() {
+      it('should not result in an exception being thrown', function() {
+        expect(function() { index({ authenticated : authenticated, login : { local : { path : '/login' } } }); }).not.toThrow();
       });
     });
   });

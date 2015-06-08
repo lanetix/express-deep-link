@@ -23,6 +23,10 @@ module.exports = function(options) {
     }
 
     loginUrl = options.login.local.path;
+
+    if (loginUrl.indexOf('/') !== 0) {
+       throw new Error('the login.local.path option must begin with a foward /');
+    }
   } else if (options.login.remote) {
     if (!options.login.remote.url) {
       throw new Error('the login.remote.url option must be provided.');
