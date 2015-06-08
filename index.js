@@ -2,7 +2,7 @@ var _ = require('lodash');
 
 function validateOptions(options) {
   var localAndRemoteLoginAreBothProvided = options.login && options.login.local && options.login.remote,
-      loginUrl;
+      loginPath;
 
   if (!options.login) {
     throw new Error('the login option is required.');
@@ -17,9 +17,9 @@ function validateOptions(options) {
       throw new Error('the login.local.path option must be provided.');
     }
 
-    loginUrl = options.login.local.path;
+    loginPath = options.login.local.path;
 
-    if (loginUrl.indexOf('/') !== 0) {
+    if (loginPath.indexOf('/') !== 0) {
        throw new Error('the login.local.path option must begin with a foward /');
     }
   } else if (options.login.remote) {
