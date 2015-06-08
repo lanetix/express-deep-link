@@ -74,7 +74,7 @@ describe('deep linking middleware', function() {
       });
     });
 
-    describe('when the login.local option is present and the login.local.path option is present', function() {
+    describe('when the login.local option is present and the login.local.path option begins with a forward slash', function() {
       it('should not result in an exception being thrown', function() {
         expect(function() { index({ authenticated : authenticated, login : { local : { path : '/login' } } }); }).not.toThrow();
       });
