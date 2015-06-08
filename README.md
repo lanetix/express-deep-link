@@ -70,8 +70,8 @@ login.
 
 #### login.local - Object
 
-Instructs the middleware that the login endpoint is deployed to the same host/website (https://contoso.com/login) as
-the target website (where clients will deep link into) as opposed to a remote host (https://login.contoso.com).
+Instructs the middleware that the login endpoint is deployed to the same host/website (i.e. https://contoso.com/login) as
+the target website (where clients will deep link into) as opposed to a remote host (i.e. https://login.contoso.com).
 
 ##### login.local.path - String
 
@@ -143,8 +143,8 @@ app.use(deeplink);
 
 #### login.remote - Object
 
-Instructs the middleware that the login endpoint is deployed to a remote (https://login.contoso.com) host/website as
-opposed to the target website (https://contoso.com/login).
+Instructs the middleware that the login endpoint is deployed to a remote (i.e. https://login.contoso.com) host/website as
+opposed to the target website (i.e. https://contoso.com/login).
 
 ##### login.remote.url - String
 
