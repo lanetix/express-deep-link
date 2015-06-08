@@ -18,7 +18,6 @@ back to that place after the fact. Of course if a user just logs into your site 
 it'll be business as usual.
 
 ## Options
-----------
 
 ### baseUrl - String (Optional)
 
@@ -187,7 +186,6 @@ app.use(deeplink);
 ```
 
 ## Where Do I Plug This Into My Pipeline At?
---------------------------------------------
 
 The expectation is that you'll use this middleware directly after your authentication middleware. Notice how the
 `authenticated` option is synchronous. I initially thought I'd need to account for promises of async based stuff
@@ -253,7 +251,6 @@ app.use(deeplink);
 ```
 
 ## Tests
---------
 
 ```shell
 git clone git@github.com:armw4/express-deep-link.git
