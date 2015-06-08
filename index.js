@@ -36,10 +36,10 @@ function validateOptions(options) {
 }
 
 function processAuthenticatedRequest(req, res, next, options) {
-  var cookieName                                 = (options.cookie && options.cookie.name) || 'returnUrl',
-      returnUrl                                  = req.cookies[cookieName], returnUrlIsRelativeToBaseUrl,
-      redirectRequestsToTheLocalLoginRouteToHome = options.login.local && req.path === options.login.local.path
-                                                  && options.login.local.authenticated && options.login.local.authenticated.home;
+  var cookieName = (options.cookie && options.cookie.name) || 'returnUrl',
+      returnUrl  = req.cookies[cookieName], returnUrlIsRelativeToBaseUrl,
+      home       = options.login.local && req.path === options.login.local.path
+                    && options.login.local.authenticated && options.login.local.authenticated.home;
 
   if (returnUrl) {
     returnUrl = decodeURIComponent(returnUrl);
@@ -54,9 +54,9 @@ function processAuthenticatedRequest(req, res, next, options) {
 
     res.clearCookie(cookieName);
     res.redirect(returnUrl);
-  } else if (redirectRequestsToTheLocalLoginRouteToHome) {
-    if (_.isString(options.login.local.authenticated.home)) {
-      res.redirect(options.login.local.authenticated.home);
+  } else if (home) {
+    if (_.isString(home)) {
+      res.redirect(home);
     } else {
       res.redirect('/');
     }
@@ -94,7 +94,7 @@ module.exports = function(options) {
   validateOptions(options);
 
   return function(req, res, next) {
-    authenticated = options.authenticated.call(undefined, req);
+    authenticated = options.authenticated(req);
 
     if (authenticated) {
       processAuthenticatedRequest(req, res, next, options);
