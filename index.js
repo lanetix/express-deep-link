@@ -39,7 +39,8 @@ function validateOptions(options) {
 module.exports = function(options) {
   var returnUrl, cookieOptions, returnUrlIsRelativeToBaseUrl, authenticated,
       cookieName, remoteAndRemoteLoginAreMutuallyExclusive, loginUrl,
-      preventLoginFromBeingServedToAuthenticatedUsers, DEFAULT_COOKIE_OPTIONS;
+      DEFAULT_COOKIE_OPTIONS, redirectRequestsToTheLocalLoginRouteToHome,
+      localLoginRouteRequested;
 
   DEFAULT_COOKIE_OPTIONS = { httpOnly : true };
   cookieName             = (options.cookie && options.cookie.name) || 'returnUrl';
@@ -54,6 +55,10 @@ module.exports = function(options) {
 
   return function(req, res, next) {
     authenticated = options.authenticated.call(undefined, req);
+
+    localLoginRouteRequested                   = options.login.local && req.path === options.login.local.path;
+    redirectRequestsToTheLocalLoginRouteToHome = options.login.local && req.path === options.login.local.path
+                                                  && options.login.local.authenticated && options.login.local.authenticated.home;
 
     if (authenticated) {
       returnUrl = req.cookies[cookieName];
@@ -71,7 +76,7 @@ module.exports = function(options) {
 
         res.clearCookie(cookieName);
         res.redirect(returnUrl);
-      } else if (options.login.local && req.path === options.login.local.path && options.login.local.authenticated && options.login.local.authenticated.home) {
+      } else if (redirectRequestsToTheLocalLoginRouteToHome) {
         if (_.isString(options.login.local.authenticated.home)) {
           res.redirect(options.login.local.authenticated.home);
         } else {
@@ -81,7 +86,7 @@ module.exports = function(options) {
         next();
       }
     } else {
-      if (options.login.local && req.path === options.login.local.path) {
+      if (localLoginRouteRequested) {
         next();
       } else {
         cookieOptions = (options.cookie && options.cookie.options) || {};
