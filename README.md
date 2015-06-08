@@ -1,9 +1,9 @@
 Compatible with [express 4.x](http://expressjs.com/4x/api.html).
 
-### Options
+## Options
 -----------
 
-#### baseUrl - String
+### baseUrl - String
 
 The `baseUrl` option is optional and is for validation/security purposes. It will ensure that the value stored inside the return url is not pointing
 to a different website. For example, if your website is hosted on https://www.somedomain.com/, all return urls should begin
@@ -18,11 +18,11 @@ var app      = express();
 app.use(deeplink);
 ```
 
-#### cookie - Object
+### cookie - Object
 
 The `cookie` option can be used to override settings for how the return url is persisted as a cookie.
 
-##### cookie.name - String
+#### cookie.name - String
 
 Controls the name of the cookie on the response.
 
@@ -37,7 +37,7 @@ var app      = express();
 app.use(deeplink);
 ```
 
-##### cookie.options - Object
+#### cookie.options - Object
 
 A hash of options that should conform to that of [`res.cookie`](http://expressjs.com/api.html#res.cookie).
 
@@ -63,43 +63,110 @@ var app      = express();
 app.use(deeplink);
 ```
 
-#### login - String|Function
+### login - Object
 
-The `login` option is responsible for logging in an unauthenticated user. `String` and `Function` are supported.
+The `login` option is responsible for logging in an unauthenticated user. It supports both local and remote
+login.
 
-##### String
+#### login.local - Object
 
-If `login` is a string, redirection will be handled internally via `deeplink`.
+Instructs the middleware that the login endpoint is deployed to the same host/website (https://contoso.com/login) as
+the target website (where clients will deep link into) as opposed to a remote host (https://login.contoso.com).
 
-```js
-var deep     = require('express-deep-link');
-var deeplink = deep({ login : 'https://my.secure.site.com/auth' });
-var express  = require('express');
-var app      = express();
+##### login.local.path - String
 
-app.use(deeplink);
-```
-
-##### Function
-
-If `login` is a function, that function will be invoked with the current response and will be responsible for redirecting the user.
+This is the request path (equivalent to the `req.path` property of an express request) of the local login endpoint.
+**It should always begin with a forward `/`** as [depicted in the express docs](http://expressjs.com/api.html#req.path).
+Why is this option important? When the path of the current request is equal to this value, we will blindly allow the
+request to pass through (without a redirect) so as to avoid infinite redirects. We should not be redirecting you to the
+login page if you're actually trying to visit the login page...feel my drift?
 
 ```js
 var deep     = require('express-deep-link');
 var deeplink = deep({
-  login : function(res) {
-    // do something funky before the redirect
-    res.redirect('some funky friggin place mang');
+  login : {
+    local : {
+      path : '/login'
+    }
   }
 });
-
 var express  = require('express');
 var app      = express();
 
 app.use(deeplink);
 ```
 
-### Where Do I Plug This Into My Pipeline At?
+##### login.local.authenticated - Object
+
+Controls options related to local authenticated requests.
+
+###### login.local.authenticated.home - Boolean|String
+
+The `login.local.authenticated.home` option is a UX enhancement that prevents authenticated users from being allowed
+to visit the login route (`login.local.path`). When this option is set, authenticated users will get redirected to the
+`/` (root) url when the value of `home` is a Boolean (true), or to the value of the `home` option when it is of type
+string.
+
+```js
+var deep     = require('express-deep-link');
+var deeplink = deep({
+  login : {
+    local : {
+      path : '/login',
+      authenticated : { home : true } // Boolean
+    }
+  }
+});
+var express  = require('express');
+var app      = express();
+
+app.use(deeplink);
+```
+
+**OR**
+
+```js
+var deep     = require('express-deep-link');
+var deeplink = deep({
+  login : {
+    local : {
+      path : '/login',
+      authenticated : { home : '/home' } // String
+    }
+  }
+});
+var express  = require('express');
+var app      = express();
+
+app.use(deeplink);
+```
+
+#### login.remote - Object
+
+Instructs the middleware that the login endpoint is deployed to a remote (https://login.contoso.com) host/website as
+opposed to the target website (https://contoso.com/login).
+
+##### login.remote.url - String
+
+This is the remote endpoint we'll redirect any unauthenticated requests to. This is different from local configuration
+as no redirect will be necessary.
+
+```js
+var deep     = require('express-deep-link');
+var deeplink = deep({
+  login : {
+    remote : {
+      url : 'https://my.secure.site.com'
+    }
+  }
+});
+var express  = require('express');
+var app      = express();
+
+app.use(deeplink);
+```
+
+## Where Do I Plug This Into My Pipeline At?
 ---------------------------------------------
 
 The expectation is that you'll use this middleware directly after your authentication middleware. Notice how the
@@ -165,7 +232,7 @@ app.use(authentication);
 app.use(deeplink);
 ```
 
-### Tests
+## Tests
 ---------
 
 ```shell
