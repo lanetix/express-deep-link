@@ -68,8 +68,8 @@ app.use(deeplink);
 The `login` option is responsible for logging in an unauthenticated user. It supports both local and remote
 login.
 
-**NOTE:** The `login.local` and `login.remote` options are mutually exclusive and you must set EXACTLY ONE of the options
-in order to use `deeplink`.
+**NOTE:** The `login.local` and `login.remote` options are mutually exclusive and you must set EXACTLY ONE of
+these options in order to use `deeplink`.
 
 #### login.local - Object (Required if not using login.remote)
 
