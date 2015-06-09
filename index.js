@@ -77,7 +77,6 @@ function processUnauthenticatedRequest(req, res, next, options) {
     localLoginRouteRequested = options.login.local && normalizedRequestPath === normalizePath(options.login.local.path),
     DEFAULT_COOKIE_OPTIONS   = { httpOnly : true }, loginUrl;
 
-
   if (options.login.local) {
     loginUrl = options.login.local.path;
   } else {
