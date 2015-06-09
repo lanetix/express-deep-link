@@ -85,7 +85,7 @@ The `login` option is responsible for logging in an unauthenticated user. It sup
 login.
 
 **NOTE:** The `login.local` and `login.remote` options are mutually exclusive and you must set ***EXACTLY ONE*** of
-these options in order to use `deepLink`.
+these options in order to use `deep-link`.
 
 #### login.local - Object (Required if not using login.remote)
 
@@ -119,7 +119,7 @@ app.use(deepLink);
 
 It probably occurred to you that you can use the express router at a very granular level. Enough so that you have absolute control
 over which routes a given middleware or set of middleware will execute for. I had the idea of removing the infinite redirect guard from
-`deep link`. I figured developers could just configure their middleware properly as opposed to blindly registering `deep link` to run on
+`deep-link`. I figured developers could just configure their middleware properly as opposed to blindly registering `deep-link` to run on
 every request.
 
 ```js
@@ -163,11 +163,11 @@ app.use('/login', loginRouter);
 
 So yea...I could definitely put the onus on developers to properly partition their middleware via the express `Router`. My initial argument for this was that if
 your login endpoint were local to your website, you'd already have to configure your authentication middleware not to run for that endpoint (you can't authenticate
-the route(s) that are responsible for authentication). You'd additionally want to exclude `deep link` from running on any requests to you API since
+the route(s) that are responsible for authentication). You'd additionally want to exclude `deep-link` from running on any requests to you API since
 you'd never deep link to anything accepting or returning JSON endpoints. But then @pythonesque made a point (of which I'd already entertained), that
 lots of sites (actually most sites according to him) are not SPAs and still employ server side rendering. In that case you have only one place to
-exclude both authentication and `deep link` (that being login). So I concluded that this could go either way. @pythonesque made a point that it can't
-hurt to guard against infinite redirects, and that the most convenient option for developers would be to allow them to blindly configure `deep link`
+exclude both authentication and `deep-link` (that being login). So I concluded that this could go either way. @pythonesque made a point that it can't
+hurt to guard against infinite redirects, and that the most convenient option for developers would be to allow them to blindly configure `deep-link`
 to run for all requests. I agree and so the infinite redirect guard shall live on and reign victorious.
 
 ##### login.local.authenticated - Object (Optional)
@@ -215,10 +215,10 @@ var app      = express();
 app.use(deepLink);
 ```
 
-##### Why Does deep link Provide this Option?
+##### Why Does deep-link Provide this Option?
 
-Again, developers will most likely want to ignorantly configure `deep link` to run on every request (`*`). I agree that a simple middleware could be plugged into
-one's Pipeline to perform this very function, but this feature has conveniently been made available free of charge. `deep link` is already closely tied
+Again, developers will most likely want to ignorantly configure `deep-link` to run on every request (`*`). I agree that a simple middleware could be plugged into
+one's Pipeline to perform this very function, but this feature has conveniently been made available free of charge. `deep-link` is already closely tied
 to login and authentication, so might as well
 
 > "go hard, or go home."
@@ -308,7 +308,7 @@ var deepLink = deep({
 var app = express();
 
 // when authentication calls next(), req.user will be populated,
-// and if it's not, deep link will cache the current url and redirect to login
+// and if it's not, deep-link will cache the current url and redirect to login
 app.use(authentication);
 app.use(deepLink);
 ```
