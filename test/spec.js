@@ -499,7 +499,7 @@ describe('deep linking middleware', function() {
       expect(cookie.called).toBe(false);
     });
 
-    it('should invoke the next middleware in the pipeline and allow the login page to be served w/o an infinite redirect', function() {
+    it('should invoke the next middleware in the pipeline', function() {
       middleware(req, res, next);
 
       expect(cookie.called).toBe(false);
