@@ -1,4 +1,5 @@
-var _ = require('lodash');
+var _   = require('lodash'),
+    url = require('url');
 
 function validateOptions(options) {
   var localAndRemoteLoginAreBothProvided = options.login && options.login.local && options.login.remote,
@@ -80,11 +81,12 @@ function processUnauthenticatedRequest(req, res, next, options) {
   if (localLoginRouteRequested) {
     next();
   } else {
-    var cookieOptions = (options.cookie && options.cookie.options) || {};
+    var cookieOptions = (options.cookie && options.cookie.options) || {},
+        returnUrl     = options.baseUrl ? url.resolve(options.baseUrl, req.originalUrl) : req.originalUrl;
 
     cookieOptions = _.defaults(cookieOptions, DEFAULT_COOKIE_OPTIONS);
 
-    res.cookie(cookieName, encodeURIComponent(req.originalUrl), cookieOptions);
+    res.cookie(cookieName, encodeURIComponent(returnUrl), cookieOptions);
     res.redirect(loginUrl);
   }
 }

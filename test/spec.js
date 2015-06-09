@@ -353,6 +353,24 @@ describe('deep linking middleware', function() {
       });
     });
 
+    describe('when the cookie option is present and the baseUrl option is present (irrespective of the local or remote options)', function() {
+      beforeEach(function() {
+        cookieOptions = { secure : true, httpOnly : false };
+        middleware    = index({
+          authenticated : authenticated,
+          cookie : { name : 'BLAH', options : cookieOptions },
+          login : { local : { path : '/login' } },
+          baseUrl : 'https://www.contoso.com/'
+        });
+      });
+
+      it('should create a uri encoded return url using the base url and the original url of the request and allow the default cookie settings to be overriden', function() {
+        middleware(req, res, next);
+
+        expect(cookie.calledWithExactly('BLAH', 'https%3A%2F%2Fwww.contoso.com%2Fsearch%3Fq%3Dsomething', cookieOptions)).toBe(true);
+      });
+    });
+
     describe('when the cookie option is not present (irrespective of the login.local or login.remote options)', function() {
       beforeEach(function() {
         middleware = index({
@@ -365,6 +383,22 @@ describe('deep linking middleware', function() {
         middleware(req, res, next);
 
         expect(cookie.calledWithExactly('returnUrl', '%2Fsearch%3Fq%3Dsomething', DEFAULT_COOKIE_OPTIONS)).toBe(true);
+      });
+    });
+
+    describe('when the cookie option is not present and the baseUrl option is present (irrespective of the login.local or login.remote options)', function() {
+      beforeEach(function() {
+        middleware = index({
+          authenticated : authenticated,
+          login : { local : { path : '/login' } },
+          baseUrl : 'https://www.contoso.com/'
+        });
+      });
+
+      it('should create a uri encoded return url using the base url and the original url of the request and the default cookie settings', function() {
+        middleware(req, res, next);
+
+        expect(cookie.calledWithExactly('returnUrl', 'https%3A%2F%2Fwww.contoso.com%2Fsearch%3Fq%3Dsomething', DEFAULT_COOKIE_OPTIONS)).toBe(true);
       });
     });
 
