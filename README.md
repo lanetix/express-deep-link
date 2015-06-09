@@ -118,8 +118,8 @@ app.use(deepLink);
 ##### Why Does deep link Guard Against Infinite Redirects?
 
 It probably occurred to you that you can use the express router at a very granular level. Enough so that you have absolute control
-over which routes a given middleware or set of middleware will execute for. I had the idea of removing the infinite redirect guard from
-`deep-link`. I figured developers could just configure their middleware properly as opposed to blindly registering `deep-link` to run on
+over which routes a given middleware or set of middleware will execute for. We contemplated removing the infinite redirect guard from
+`deep-link`. The thought was that developers could just configure their middleware properly as opposed to blindly registering `deep-link` to run on
 every request.
 
 ```js
@@ -161,14 +161,14 @@ app.use('/api', apiRouter);
 app.use('/login', loginRouter);
 ```
 
-So yea...I could definitely put the onus on developers to properly partition their middleware via the express `Router`. My initial argument for this was that if
+So yea...the onus could definitely be offloaded onto developers to properly partition their middleware via the express `Router`. The initial argument for this was that if
 your login endpoint were local to your website, you'd already have to configure your authentication middleware not to run for that endpoint (you can't authenticate
 the route(s) that are responsible for authentication). You'd additionally want to exclude `deep-link` from running on any requests to you API since
-you'd never deep link to anything accepting or returning JSON endpoints. But then @pythonesque made a point (of which I'd already entertained), that
+you'd never deep link to anything accepting or returning JSON endpoints. But then @pythonesque made a point (of which was already entertained), that
 lots of sites (actually most sites according to him) are not SPAs and still employ server side rendering. In that case you have only one place to
-exclude both authentication and `deep-link` (that being login). So I concluded that this could go either way. @pythonesque made a point that it can't
+exclude both authentication and `deep-link` (that being login). So it concluded that this could go either way. @pythonesque made a point that it can't
 hurt to guard against infinite redirects, and that the most convenient option for developers would be to allow them to blindly configure `deep-link`
-to run for all requests. I agree and so the infinite redirect guard shall live on and reign victorious.
+to run for all requests. The feeling was mutual and so the infinite redirect guard shall live on and reign victorious.
 
 ##### login.local.authenticated - Object (Optional)
 
@@ -217,7 +217,7 @@ app.use(deepLink);
 
 ##### Why Does deep-link Provide this Option?
 
-Again, developers will most likely want to ignorantly configure `deep-link` to run on every request (`*`). I agree that a simple middleware could be plugged into
+Again, developers will most likely want to ignorantly configure `deep-link` to run on every request (`*`). A simple middleware could be plugged into
 one's Pipeline to perform this very function, but this feature has conveniently been made available free of charge. `deep-link` is already closely tied
 to login and authentication, so might as well
 
@@ -250,18 +250,16 @@ app.use(deepLink);
 
 ## Where Do I Plug This Into My Pipeline At?
 
-The expectation is that you'll use this middleware directly after your authentication middleware. Notice how the
-`authenticated` option is synchronous. I initially thought I'd need to account for promises of async based stuff
-via `function(err, result)`. That would have sucked from a coding perspective. It would have definitely increased
-the overall complexity of things. Then I had a sudden epiphany that
+The expectation is that you'll use this middleware directly after your authentication middleware. Notice how the `authenticated` option is
+synchronous. The initial thought was that things like promises or async based stuff via `function(err, result)` would need to be accounted for.
+That would have sucked from a coding perspective. It would have definitely increased the overall complexity of things. Then an epiphany was born:
 
-> "hey...wait a sec...why don't I just let the authentication middleware handle it's job in the way that it wants.
-..it'll tell me once it's done doing it's job via `next()`...then I can just piggy back off of the results."
+> "hey...wait a sec...why don't we just let the authentication middleware handle it's job in the way that it wants.
+..it'll tell us once it's done doing it's job via `next()`...then we can just piggy back off of the results."
 
-That's a much clearer separation of concerns in my mind. Authentication middleware can focus on authenticating the
-current user and bouncing them back to a login or elsewhere upon failure. Should everything check out, `next()` would
-be invoked and we can interrogate the results of whatever key said authentication middleware writes to the request.
-Let me give you an example.
+That's a much clearer separation of concerns. Authentication middleware can focus on authenticating the current user and bouncing them back to
+a login or elsewhere upon failure. Should everything check out, `next()` would be invoked and we can interrogate the results of whatever key said
+authentication middleware writes to the request. Let's give an example:
 
 ```js
 // middleware/authentication.js
@@ -322,10 +320,10 @@ So yea...you've seen some sites do the https://www.my.site.com?rUrl=someuriencod
 https://accounts.google.com/ServiceLogin?hl=en&continue=https://www.google.com/
 ```
 
-I could certainly code `deep-link` to do the same, but I feel like the cookie based approach is cleaner and not as
-trivial to tamper with (the motive for the `baseUrl` option). I guess it can be done either way, but this is my current
+We could certainly code `deep-link` to do the same, but the cookie based approach is cleaner and not as
+trivial to tamper with (the motive for the `baseUrl` option). It can certainly be done either way, but this is our current
 stance on the matter. Maybe a `strategy` option of some sort could be introduced to let you pick
-witch storage mechanism you'd like to use for persisting the url (`cookie`, `query-string`). To be continued...
+which storage mechanism you'd like to use for persisting the url (`cookie`, `query-string`). To be continued...
 
 ## Tests
 
