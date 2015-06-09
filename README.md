@@ -315,9 +315,16 @@ app.use(deepLink);
 
 ## Why a Cookie vs the Query String?
 
-So yea...you've seen some sites do the https://www.my.site.com/?rUrl=someuriencodedreturnurl thing right? I could certainly code `deep-link` to do
-the same, but I feel like the cookie based approach is cleaner and not as trivial to tamper with (the motive for the `baseUrl` option). I guess
-it can be done either way, but this is my current stance on the matter. Maybe a strategy option of some sort could be introduced to let you pick
+So yea...you've seen some sites do the https://www.my.site.com?rUrl=someuriencodedreturnurl thing right?
+
+```
+// example from Google
+https://accounts.google.com/ServiceLogin?hl=en&continue=https://www.google.com/
+```
+
+I could certainly code `deep-link` to do the same, but I feel like the cookie based approach is cleaner and not as
+trivial to tamper with (the motive for the `baseUrl` option). I guess it can be done either way, but this is my current
+stance on the matter. Maybe a `strategy` option of some sort could be introduced to let you pick
 witch storage mechanism you'd like to use for persisting the url (`cookie`, `query-string`). To be continued...
 
 ## Tests
