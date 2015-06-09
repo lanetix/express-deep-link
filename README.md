@@ -27,11 +27,11 @@ with this value. That is to say, they should be relative to https://www.somedoma
 
 ```js
 var deep     = require('express-deep-link');
-var deeplink = deep({ baseUrl : 'https://my.site.com/blah' });
+var deepLink = deep({ baseUrl : 'https://my.site.com/blah' });
 var express  = require('express');
 var app      = express();
 
-app.use(deeplink);
+app.use(deepLink);
 ```
 
 ### cookie - Object (Optional)
@@ -46,11 +46,11 @@ Default - `returnUrl`
 
 ```js
 var deep     = require('express-deep-link');
-var deeplink = deep({ cookie : { name : 'BLAH' } });
+var deepLink = deep({ cookie : { name : 'BLAH' } });
 var express  = require('express');
 var app      = express();
 
-app.use(deeplink);
+app.use(deepLink);
 ```
 
 #### cookie.options - Object (Optional)
@@ -61,7 +61,7 @@ Default - `{ httpOnly : true }`
 
 ```js
 var deep     = require('express-deep-link');
-var deeplink = deep({
+var deepLink = deep({
   cookie : {
     options : {
       domain: '.example.com',
@@ -76,7 +76,7 @@ var deeplink = deep({
 var express  = require('express');
 var app      = express();
 
-app.use(deeplink);
+app.use(deepLink);
 ```
 
 ### login - Object (Required)
@@ -85,7 +85,7 @@ The `login` option is responsible for logging in an unauthenticated user. It sup
 login.
 
 **NOTE:** The `login.local` and `login.remote` options are mutually exclusive and you must set ***EXACTLY ONE*** of
-these options in order to use `deeplink`.
+these options in order to use `deepLink`.
 
 #### login.local - Object (Required if not using login.remote)
 
@@ -102,7 +102,7 @@ login page if you're actually trying to visit the login page...feel my drift?
 
 ```js
 var deep     = require('express-deep-link');
-var deeplink = deep({
+var deepLink = deep({
   login : {
     local : {
       path : '/login'
@@ -112,8 +112,62 @@ var deeplink = deep({
 var express  = require('express');
 var app      = express();
 
-app.use(deeplink);
+app.use(deepLink);
 ```
+
+##### Why Does deep link Guard Against Infinite Redirects?
+
+It probably occurred to you that you can use the express router at a very granular level. Enough so that you have absolute control
+over which routes a given middleware or set of middleware will execute for. I had the idea of removing the infinite redirect guard from
+`deep link`. I figured developers could just configure their middleware properly as opposed to blindly registering `deep link` to run on
+every request.
+
+```
+var express     = require('express');
+var deep        = require('express-deep-link');
+var app         = express();
+var authRouter  = express.Router();
+var apiRouter   = express.Router();
+var loginRouter = express.Router();
+var auth        = require('./middleware/your-app-auth');
+var deepLink    = deep({...options...});
+
+// invoked for any requests passed to this router
+authRouter.use(auth);
+authRouter.use(deepLink);
+
+apiRouter.use(auth);
+
+loginRouter.get('/', function(req, res) {
+  res.render('login');
+});
+
+loginRouter.post('/', function(req, res, next) {
+
+});
+
+// only requests to /ui/* will be sent to our "router"
+// the ui router contains both auth and deep linking middleware
+app.use('/ui', authRouter);
+
+// only requests to /api/* will be sent to our "router"
+// the api router contains only auth middleware
+app.use('/api', apiRouter);
+
+// only requests to /login/* will be sent to our "router"
+// the login router contains NO middleware at all since it should
+// accept unauthenticated requests and no deep linking should ever occur
+app.use('/login', loginRouter);
+```
+
+So yea...I could definitely put the onus on developers to properly partition their middleware via the express `Router`. My initial argument for this was that if
+your login endpoint were local to your website, you'd already have to configure your authentication middleware not to run for that endpoint (you can't authenticate
+the route(s) that are responsible for authentication). You'd additionally want to exclude `deep link` from running on any requests to you API since
+you'd never deep link to anything accepting or returning JSON endpoints. But then @pythonesque made a point (of which I'd already entertained), that
+lots of sites (actually most sites according to him) are not SPAs and still employ server side rendering. In that case you have only one place to
+exclude both authentication and `deep link` (that being login). So I concluded that this could go either way. @pythonesque made a point that it can't
+hurt to guard against infinite redirects, and that the most convenient option for developers would be to allow them to blindly configure `deep link`
+to run for all requests. I agree and so the infinite redirect guard shall live on and reign victorious.
 
 ##### login.local.authenticated - Object (Optional)
 
@@ -128,7 +182,7 @@ to visit the login route (`login.local.path`). When this option is set, authenti
 
 ```js
 var deep     = require('express-deep-link');
-var deeplink = deep({
+var deepLink = deep({
   login : {
     local : {
       path : '/login',
@@ -139,14 +193,14 @@ var deeplink = deep({
 var express  = require('express');
 var app      = express();
 
-app.use(deeplink);
+app.use(deepLink);
 ```
 
 **OR**
 
 ```js
 var deep     = require('express-deep-link');
-var deeplink = deep({
+var deepLink = deep({
   login : {
     local : {
       path : '/login',
@@ -157,8 +211,16 @@ var deeplink = deep({
 var express  = require('express');
 var app      = express();
 
-app.use(deeplink);
+app.use(deepLink);
 ```
+
+##### Why Does deep link Provide this Option?
+
+Again, developers will most likely want to ignorantly configure `deep link` to run on every request (`*`). I agree that a simple middleware could be plugged into
+one's Pipeline to perform this very function, but this feature has conveniently been made available free of charge. `deep link` is already closely tied
+to login and authentication, so might as well
+
+> "go hard, or go home."
 
 #### login.remote - Object (Required if not using login.local)
 
@@ -172,7 +234,7 @@ as no redirect will be necessary.
 
 ```js
 var deep     = require('express-deep-link');
-var deeplink = deep({
+var deepLink = deep({
   login : {
     remote : {
       url : 'https://my.secure.site.com'
@@ -182,7 +244,7 @@ var deeplink = deep({
 var express  = require('express');
 var app      = express();
 
-app.use(deeplink);
+app.use(deepLink);
 ```
 
 ## Where Do I Plug This Into My Pipeline At?
@@ -210,7 +272,7 @@ function(req, res, next) {
 
   if(!token) {
     /* instead of redirecting to login, give the
-    *  deeplinking middleware a chance to store the
+    *  deep linking middleware a chance to store the
     *  current request url, and THEN redirect to login
     *  via the login option
     */
@@ -237,7 +299,7 @@ var authentication = require('./middleware/authentication')();
 var deep           = require('express-deep-link');
 var express        = require('express');
 
-var deeplink = deep({
+var deepLink = deep({
   authenticated : function() { return req.user; },
   login         : 'https://secure.login.com'
 });
@@ -245,9 +307,9 @@ var deeplink = deep({
 var app = express();
 
 // when authentication calls next(), req.user will be populated,
-// and if it's not, deeplink will cache the current url and redirect to login
+// and if it's not, deep link will cache the current url and redirect to login
 app.use(authentication);
-app.use(deeplink);
+app.use(deepLink);
 ```
 
 ## Tests
