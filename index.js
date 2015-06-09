@@ -36,11 +36,17 @@ function validateOptions(options) {
   }
 }
 
+function normalizePath(path) {
+  return (_.endsWith(path, '/') ? path : path + '/').toLowerCase();
+}
+
+
 function processAuthenticatedRequest(req, res, next, options) {
-  var cookieName = (options.cookie && options.cookie.name) || 'returnUrl',
-      returnUrl  = req.cookies[cookieName], returnUrlIsRelativeToBaseUrl,
-      home       = options.login.local && req.path === options.login.local.path
-                    && options.login.local.authenticated && options.login.local.authenticated.home;
+  var cookieName            = (options.cookie && options.cookie.name) || 'returnUrl',
+      returnUrl             = req.cookies[cookieName], returnUrlIsRelativeToBaseUrl,
+      normalizedRequestPath = normalizePath(req.path),
+      home                  = options.login.local && normalizedRequestPath === normalizePath(options.login.local.path)
+                              && options.login.local.authenticated && options.login.local.authenticated.home;
 
   if (returnUrl) {
     returnUrl = decodeURIComponent(returnUrl);
@@ -68,9 +74,10 @@ function processAuthenticatedRequest(req, res, next, options) {
 
 function processUnauthenticatedRequest(req, res, next, options) {
   var cookieName             = (options.cookie && options.cookie.name) || 'returnUrl',
-    localLoginRouteRequested = options.login.local && req.path === options.login.local.path,
-    DEFAULT_COOKIE_OPTIONS   = { httpOnly : true },
-    loginUrl;
+    normalizedRequestPath    = normalizePath(req.path),
+    localLoginRouteRequested = options.login.local && normalizedRequestPath === normalizePath(options.login.local.path),
+    DEFAULT_COOKIE_OPTIONS   = { httpOnly : true }, loginUrl;
+
 
   if (options.login.local) {
     loginUrl = options.login.local.path;

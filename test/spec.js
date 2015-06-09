@@ -93,7 +93,7 @@ describe('deep linking middleware', function() {
         beforeEach(function() {
           localLoginOptions = { local : { path : '/login', authenticated : {} } };
           middleware        = index({ authenticated : authenticated, login : localLoginOptions  });
-          req               = request({ path : '/login' });
+          req               = request({ path : '/loGIN/' });
         });
 
         describe('when the login.local.authenticated.home option is a string', function() {
@@ -434,7 +434,7 @@ describe('deep linking middleware', function() {
 
         describe('when the path of the current request matches the login.local.path option', function() {
           beforeEach(function() {
-            req = request({ path : '/login' });
+            req = request({ path : '/LogIn/' });
           });
 
           it('should not redirect to any path or url', function () {
