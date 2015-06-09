@@ -122,7 +122,7 @@ over which routes a given middleware or set of middleware will execute for. I ha
 `deep link`. I figured developers could just configure their middleware properly as opposed to blindly registering `deep link` to run on
 every request.
 
-```
+```js
 var express     = require('express');
 var deep        = require('express-deep-link');
 var app         = express();
