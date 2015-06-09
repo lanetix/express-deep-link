@@ -92,14 +92,16 @@ function processUnauthenticatedRequest(req, res, next, options) {
 }
 
 module.exports = function(options) {
-  var authenticated;
-
   validateOptions(options);
 
   return function(req, res, next) {
-    authenticated = options.authenticated(req);
+    var authenticated = options.authenticated(req),
+        getRequestIssued = req.method.toLowerCase() === 'get';
 
-    if (authenticated) {
+    if (!getRequestIssued) {
+       next();
+    }
+    else if (authenticated) {
       processAuthenticatedRequest(req, res, next, options);
     } else {
       processUnauthenticatedRequest(req, res, next, options);

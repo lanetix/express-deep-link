@@ -81,328 +81,329 @@ describe('deep linking middleware', function() {
     });
   });
 
-  describe('when the request is authenticated', function() {
-    beforeEach(function() {
-      authenticated.returns(true);
-
-      res = response({ redirect : redirect, clearCookie: clearCookie });
-    });
-
-    describe('when there is no return url, and the request path is equal to the login.local.path option', function() {
+  describe('when a GET request is issued', function() {
+    describe('when the request is authenticated', function() {
       beforeEach(function() {
-        localLoginOptions = { local : { path : '/login', authenticated : {} } };
-        middleware        = index({ authenticated : authenticated, login : localLoginOptions  });
-        req               = request({ path : '/login' });
+        authenticated.returns(true);
+
+        res = response({ redirect : redirect, clearCookie: clearCookie });
       });
 
-      describe('when the login.local.authenticated.home option is a string', function() {
+      describe('when there is no return url, and the request path is equal to the login.local.path option', function() {
         beforeEach(function() {
-          localLoginOptions.local.authenticated.home = '/my/home/route';
+          localLoginOptions = { local : { path : '/login', authenticated : {} } };
+          middleware        = index({ authenticated : authenticated, login : localLoginOptions  });
+          req               = request({ path : '/login' });
         });
 
-        it('should not invoke the next middleware in the pipeline', function() {
-          middleware(req, res, next);
+        describe('when the login.local.authenticated.home option is a string', function() {
+          beforeEach(function() {
+            localLoginOptions.local.authenticated.home = '/my/home/route';
+          });
 
-          expect(next.called).toBe(false);
+          it('should not invoke the next middleware in the pipeline', function() {
+            middleware(req, res, next);
+
+            expect(next.called).toBe(false);
+          });
+
+          it('should prevent the login page from being served to authenticated users and redirect to the login.local.authenticated.home option', function() {
+            middleware(req, res, next);
+
+            expect(redirect.calledWithExactly('/my/home/route')).toBe(true);
+          });
         });
 
-        it('should prevent the login page from being served to authenticated users and redirect to the login.local.authenticated.home option', function() {
-          middleware(req, res, next);
+        describe('when the login.local.authenticated.home option is truthy', function() {
+          beforeEach(function() {
+            localLoginOptions.local.authenticated.home = true;
+          });
 
-          expect(redirect.calledWithExactly('/my/home/route')).toBe(true);
-        });
-      });
+          it('should not invoke the next middleware in the pipeline', function() {
+            middleware(req, res, next);
 
-      describe('when the login.local.authenticated.home option is truthy', function() {
-        beforeEach(function() {
-          localLoginOptions.local.authenticated.home = true;
-        });
+            expect(next.called).toBe(false);
+          });
 
-        it('should not invoke the next middleware in the pipeline', function() {
-          middleware(req, res, next);
+          it('should prevent the login page from being served to authenticated users and redirect to the / (root) url', function() {
+            middleware(req, res, next);
 
-          expect(next.called).toBe(false);
-        });
-
-        it('should prevent the login page from being served to authenticated users and redirect to the / (root) url', function() {
-          middleware(req, res, next);
-
-          expect(redirect.calledWithExactly('/')).toBe(true);
-        });
-      });
-
-      describe('when the login.local.authenticated.home option is falsy', function() {
-        beforeEach(function() {
-          localLoginOptions.local.authenticated.home = null;
+            expect(redirect.calledWithExactly('/')).toBe(true);
+          });
         });
 
-        it('should not redirect', function() {
-          middleware(req, res, next);
+        describe('when the login.local.authenticated.home option is falsy', function() {
+          beforeEach(function() {
+            localLoginOptions.local.authenticated.home = null;
+          });
 
-          expect(redirect.called).toBe(false);
+          it('should not redirect', function() {
+            middleware(req, res, next);
+
+            expect(redirect.called).toBe(false);
+          });
+
+          it('should invoke the next middleware in the pipeline and allow the login page to be potentially served to authenticated users', function() {
+            middleware(req, res, next);
+
+            expect(next.calledOnce).toBe(true);
+          });
         });
 
-        it('should invoke the next middleware in the pipeline and allow the login page to be potentially served to authenticated users', function() {
-          middleware(req, res, next);
+        describe('when the login.local.authenticated option is not present', function() {
+          beforeEach(function() {
+            delete localLoginOptions.local.authenticated;
+          });
 
-          expect(next.calledOnce).toBe(true);
-        });
-      });
+          it('should not redirect', function() {
+            middleware(req, res, next);
 
-      describe('when the login.local.authenticated option is not present', function() {
-        beforeEach(function() {
-          delete localLoginOptions.local.authenticated;
-        });
+            expect(redirect.called).toBe(false);
+          });
 
-        it('should not redirect', function() {
-          middleware(req, res, next);
+          it('should invoke the next middleware in the pipeline and allow the login page to be potentially served to authenticated users', function() {
+            middleware(req, res, next);
 
-          expect(redirect.called).toBe(false);
-        });
-
-        it('should invoke the next middleware in the pipeline and allow the login page to be potentially served to authenticated users', function() {
-          middleware(req, res, next);
-
-          expect(next.calledOnce).toBe(true);
-        });
-      });
-
-      describe('when the login.local.authenticated.home option is not present', function() {
-        beforeEach(function() {
-          delete localLoginOptions.local.authenticated.home;
+            expect(next.calledOnce).toBe(true);
+          });
         });
 
-        it('should not redirect', function() {
-          middleware(req, res, next);
+        describe('when the login.local.authenticated.home option is not present', function() {
+          beforeEach(function() {
+            delete localLoginOptions.local.authenticated.home;
+          });
 
-          expect(redirect.called).toBe(false);
-        });
+          it('should not redirect', function() {
+            middleware(req, res, next);
 
-        it('should invoke the next middleware in the pipeline and allow the login page to be potentially served to authenticated users', function() {
-          middleware(req, res, next);
+            expect(redirect.called).toBe(false);
+          });
 
-          expect(next.calledOnce).toBe(true);
-        });
-      });
-    });
+          it('should invoke the next middleware in the pipeline and allow the login page to be potentially served to authenticated users', function() {
+            middleware(req, res, next);
 
-    describe('when a return url is present and the cookie.name option is present', function() {
-      beforeEach(function() {
-        returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
-        req        = request({ cookies : { 'BLAH' : returnUrl }, path : '/home' });
-        middleware = index({
-          authenticated : authenticated,
-          cookie: { name : 'BLAH' },
-          login : { local : { path : '/login', authenticated : { home : true } } }
+            expect(next.calledOnce).toBe(true);
+          });
         });
       });
 
-      it('should purge the return url from the response using the name of the cookie provided by the cookie option', function() {
-        middleware(req, res, next);
-
-        expect(clearCookie.calledWithExactly('BLAH')).toBe(true);
-      });
-    });
-
-    describe('when a return url is present and the cookie.name option is not present', function() {
-      beforeEach(function() {
-        returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
-        req        = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
-        middleware = index({
-          authenticated : authenticated,
-          login : { local : { path : '/login', authenticated : { home : true  } } }
-        });
-      });
-
-      it('should purge the return url from the response using the default cookie name', function() {
-        middleware(req, res, next);
-
-        expect(clearCookie.calledWithExactly('returnUrl')).toBe(true);
-      });
-    });
-
-    describe('when no baseUrl option is present', function() {
-      beforeEach(function() {
-        returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
-        req        = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
-        middleware = index({
-          authenticated : authenticated,
-          login : { local : { path : '/login', authenticated : { home : true } } }
-        });
-      });
-
-      it('should not invoke the next middleware in the pipeline', function() {
-        middleware(req, res, next);
-
-        expect(next.called).toBe(false);
-      });
-
-      it('should redirect to the return url without verifying that the return url is relative to any particular url', function() {
-        middleware(req, res, next);
-
-        expect(redirect.calledWithExactly('http://i.hack.you.com/via/xss')).toBe(true);
-      });
-    });
-
-    describe('when the baseUrl option is present', function() {
-      beforeEach(function() {
-        returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
-        req        = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
-        middleware = index({
-          authenticated : authenticated,
-          login : { local : { path : '/login', authenticated : { home : true } } },
-          baseUrl : BASE_URL
-        });
-      });
-
-      describe('when a return url that is relative to the baseUrl option is present', function() {
-        beforeEach(function() {
-          returnUrl = encodeURIComponent(url.resolve(BASE_URL, 'the/booty-butt-naked/truth'));
-          req       = request({ cookies : { returnUrl : returnUrl } });
-        });
-
-        it('should not invoke the next middleware in the pipeline', function() {
-          expect(next.called).toBe(false);
-        });
-
-        it('should redirect to the return url', function() {
-          middleware(req, res, next);
-
-          expect(redirect.calledWithExactly(url.resolve(BASE_URL, 'the/booty-butt-naked/truth'))).toBe(true);
-        });
-      });
-
-      describe('when a return url that is not relative to the baseUrl option is present', function() {
+      describe('when a return url is present and the cookie.name option is present', function() {
         beforeEach(function() {
           returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
-          req        = request({ cookies : { returnUrl : returnUrl } });
+          req        = request({ cookies : { 'BLAH' : returnUrl }, path : '/home' });
           middleware = index({
             authenticated : authenticated,
-            baseUrl : BASE_URL,
+            cookie: { name : 'BLAH' },
             login : { local : { path : '/login', authenticated : { home : true } } }
           });
         });
 
-        it('should not redirect to the invalid return url', function() {
-          try { middleware(req, res, next); } catch(e) { }
+        it('should purge the return url from the response using the name of the cookie provided by the cookie option', function() {
+          middleware(req, res, next);
+
+          expect(clearCookie.calledWithExactly('BLAH')).toBe(true);
+        });
+      });
+
+      describe('when a return url is present and the cookie.name option is not present', function() {
+        beforeEach(function() {
+          returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
+          req        = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
+          middleware = index({
+            authenticated : authenticated,
+            login : { local : { path : '/login', authenticated : { home : true  } } }
+          });
+        });
+
+        it('should purge the return url from the response using the default cookie name', function() {
+          middleware(req, res, next);
+
+          expect(clearCookie.calledWithExactly('returnUrl')).toBe(true);
+        });
+      });
+
+      describe('when no baseUrl option is present', function() {
+        beforeEach(function() {
+          returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
+          req        = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
+          middleware = index({
+            authenticated : authenticated,
+            login : { local : { path : '/login', authenticated : { home : true } } }
+          });
+        });
+
+        it('should not invoke the next middleware in the pipeline', function() {
+          middleware(req, res, next);
+
+          expect(next.called).toBe(false);
+        });
+
+        it('should redirect to the return url without verifying that the return url is relative to any particular url', function() {
+          middleware(req, res, next);
+
+          expect(redirect.calledWithExactly('http://i.hack.you.com/via/xss')).toBe(true);
+        });
+      });
+
+      describe('when the baseUrl option is present', function() {
+        beforeEach(function() {
+          returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
+          req        = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
+          middleware = index({
+            authenticated : authenticated,
+            login : { local : { path : '/login', authenticated : { home : true } } },
+            baseUrl : BASE_URL
+          });
+        });
+
+        describe('when a return url that is relative to the baseUrl option is present', function() {
+          beforeEach(function() {
+            returnUrl = encodeURIComponent(url.resolve(BASE_URL, 'the/booty-butt-naked/truth'));
+            req       = request({ cookies : { returnUrl : returnUrl } });
+          });
+
+          it('should not invoke the next middleware in the pipeline', function() {
+            expect(next.called).toBe(false);
+          });
+
+          it('should redirect to the return url', function() {
+            middleware(req, res, next);
+
+            expect(redirect.calledWithExactly(url.resolve(BASE_URL, 'the/booty-butt-naked/truth'))).toBe(true);
+          });
+        });
+
+        describe('when a return url that is not relative to the baseUrl option is present', function() {
+          beforeEach(function() {
+            returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
+            req        = request({ cookies : { returnUrl : returnUrl } });
+            middleware = index({
+              authenticated : authenticated,
+              baseUrl : BASE_URL,
+              login : { local : { path : '/login', authenticated : { home : true } } }
+            });
+          });
+
+          it('should not redirect to the invalid return url', function() {
+            try { middleware(req, res, next); } catch(e) { }
+
+            expect(redirect.called).toBe(false);
+          });
+
+          it('should not invoke the next middleware in the pipeline', function() {
+            expect(next.called).toBe(false);
+          });
+
+          it('should result in an exception being thrown', function() {
+            expect(function() { middleware(req, res, next); }).toThrow();
+          });
+        });
+      });
+
+      describe('when a return url is not present', function() {
+        beforeEach(function() {
+          req = request({ path : '/foreign' });
+          middleware = index({
+            authenticated : authenticated,
+            login : { local : { path : '/login', authenticated : { home : true } } }
+          });
+        });
+
+        it('should not redirect', function() {
+          middleware(req, res, next);
 
           expect(redirect.called).toBe(false);
         });
 
-        it('should not invoke the next middleware in the pipeline', function() {
-          expect(next.called).toBe(false);
+        it('should not purge the non existent return url from the response', function() {
+          middleware(req, res, next);
+
+          expect(clearCookie.called).toBe(false);
         });
 
-        it('should result in an exception being thrown', function() {
-          expect(function() { middleware(req, res, next); }).toThrow();
+        it('should invoke the next middleware in the pipeline', function() {
+          middleware(req, res, next);
+
+          expect(next.calledOnce).toBe(true);
         });
       });
     });
 
-    describe('when a return url is not present', function() {
+    describe('when the request is unauthenticated', function() {
       beforeEach(function() {
-        req = request({ path : '/foreign' });
-        middleware = index({
-          authenticated : authenticated,
-          login : { local : { path : '/login', authenticated : { home : true } } }
+        authenticated.returns(false);
+
+        req = request({ path : '/wal-mart', originalUrl : '/search?q=something' });
+        res = response({ cookie : cookie, redirect : redirect });
+      });
+
+      describe('when the cookie option is present (irrespective of the local or remote options)', function() {
+        beforeEach(function() {
+          cookieOptions = { secure : true, httpOnly : false };
+          middleware    = index({
+            authenticated : authenticated,
+            cookie : { name : 'BLAH', options : cookieOptions },
+            login : { local : { path : '/login' } }
+          });
+        });
+
+        it('should create a uri encoded return url using the original url of the request and allow the default cookie settings to be overriden', function() {
+          middleware(req, res, next);
+
+          expect(cookie.calledWithExactly('BLAH', '%2Fsearch%3Fq%3Dsomething', cookieOptions)).toBe(true);
         });
       });
 
-      it('should not redirect', function() {
-        middleware(req, res, next);
+      describe('when the cookie option is present and the baseUrl option is present (irrespective of the local or remote options)', function() {
+        beforeEach(function() {
+          cookieOptions = { secure : true, httpOnly : false };
+          middleware    = index({
+            authenticated : authenticated,
+            cookie : { name : 'BLAH', options : cookieOptions },
+            login : { local : { path : '/login' } },
+            baseUrl : 'https://www.contoso.com/'
+          });
+        });
 
-        expect(redirect.called).toBe(false);
-      });
+        it('should create a uri encoded return url using the base url and the original url of the request and allow the default cookie settings to be overriden', function() {
+          middleware(req, res, next);
 
-      it('should not purge the non existent return url from the response', function() {
-        middleware(req, res, next);
-
-        expect(clearCookie.called).toBe(false);
-      });
-
-      it('should invoke the next middleware in the pipeline', function() {
-        middleware(req, res, next);
-
-        expect(next.calledOnce).toBe(true);
-      });
-    });
-  });
-
-  describe('when the request is unauthenticated', function() {
-    beforeEach(function() {
-      authenticated.returns(false);
-
-      req   = request({ path : '/wal-mart', originalUrl : '/search?q=something' });
-      res   = response({ cookie : cookie, redirect : redirect });
-    });
-
-    describe('when the cookie option is present (irrespective of the local or remote options)', function() {
-      beforeEach(function() {
-        cookieOptions = { secure : true, httpOnly : false };
-        middleware    = index({
-          authenticated : authenticated,
-          cookie : { name : 'BLAH', options : cookieOptions },
-          login : { local : { path : '/login' } }
+          expect(cookie.calledWithExactly('BLAH', 'https%3A%2F%2Fwww.contoso.com%2Fsearch%3Fq%3Dsomething', cookieOptions)).toBe(true);
         });
       });
 
-      it('should create a uri encoded return url using the original url of the request and allow the default cookie settings to be overriden', function() {
-        middleware(req, res, next);
+      describe('when the cookie option is not present (irrespective of the login.local or login.remote options)', function() {
+        beforeEach(function() {
+          middleware = index({
+            authenticated : authenticated,
+            login : { local : { path : '/login' } }
+          });
+        });
 
-        expect(cookie.calledWithExactly('BLAH', '%2Fsearch%3Fq%3Dsomething', cookieOptions)).toBe(true);
-      });
-    });
+        it('should create a uri encoded return url using the original url of the request and the default cookie settings', function() {
+          middleware(req, res, next);
 
-    describe('when the cookie option is present and the baseUrl option is present (irrespective of the local or remote options)', function() {
-      beforeEach(function() {
-        cookieOptions = { secure : true, httpOnly : false };
-        middleware    = index({
-          authenticated : authenticated,
-          cookie : { name : 'BLAH', options : cookieOptions },
-          login : { local : { path : '/login' } },
-          baseUrl : 'https://www.contoso.com/'
+          expect(cookie.calledWithExactly('returnUrl', '%2Fsearch%3Fq%3Dsomething', DEFAULT_COOKIE_OPTIONS)).toBe(true);
         });
       });
 
-      it('should create a uri encoded return url using the base url and the original url of the request and allow the default cookie settings to be overriden', function() {
-        middleware(req, res, next);
+      describe('when the cookie option is not present and the baseUrl option is present (irrespective of the login.local or login.remote options)', function() {
+        beforeEach(function() {
+          middleware = index({
+            authenticated : authenticated,
+            login : { local : { path : '/login' } },
+            baseUrl : 'https://www.contoso.com/'
+          });
+        });
 
-        expect(cookie.calledWithExactly('BLAH', 'https%3A%2F%2Fwww.contoso.com%2Fsearch%3Fq%3Dsomething', cookieOptions)).toBe(true);
-      });
-    });
+        it('should create a uri encoded return url using the base url and the original url of the request and the default cookie settings', function() {
+          middleware(req, res, next);
 
-    describe('when the cookie option is not present (irrespective of the login.local or login.remote options)', function() {
-      beforeEach(function() {
-        middleware = index({
-          authenticated : authenticated,
-          login : { local : { path : '/login' } }
+          expect(cookie.calledWithExactly('returnUrl', 'https%3A%2F%2Fwww.contoso.com%2Fsearch%3Fq%3Dsomething', DEFAULT_COOKIE_OPTIONS)).toBe(true);
         });
       });
 
-      it('should create a uri encoded return url using the original url of the request and the default cookie settings', function() {
-        middleware(req, res, next);
-
-        expect(cookie.calledWithExactly('returnUrl', '%2Fsearch%3Fq%3Dsomething', DEFAULT_COOKIE_OPTIONS)).toBe(true);
-      });
-    });
-
-    describe('when the cookie option is not present and the baseUrl option is present (irrespective of the login.local or login.remote options)', function() {
-      beforeEach(function() {
-        middleware = index({
-          authenticated : authenticated,
-          login : { local : { path : '/login' } },
-          baseUrl : 'https://www.contoso.com/'
-        });
-      });
-
-      it('should create a uri encoded return url using the base url and the original url of the request and the default cookie settings', function() {
-        middleware(req, res, next);
-
-        expect(cookie.calledWithExactly('returnUrl', 'https%3A%2F%2Fwww.contoso.com%2Fsearch%3Fq%3Dsomething', DEFAULT_COOKIE_OPTIONS)).toBe(true);
-      });
-    });
-
-    describe('when the login.remote.url option is present', function() {
+      describe('when the login.remote.url option is present', function() {
         beforeEach(function() {
           middleware = index({
             authenticated : authenticated,
@@ -421,57 +422,87 @@ describe('deep linking middleware', function() {
 
           expect(redirect.calledWithExactly('https://my.secure.site.com/')).toBe(true);
         });
+      });
+
+      describe('when the login.local.path option is present', function () {
+        beforeEach(function() {
+          middleware = index({
+            authenticated : authenticated,
+            login : { local: { path : '/login' }  }
+          });
+        });
+
+        describe('when the path of the current request matches the login.local.path option', function() {
+          beforeEach(function() {
+            req = request({ path : '/login' });
+          });
+
+          it('should not redirect to any path or url', function () {
+            middleware(req, res, next);
+
+            expect(redirect.called).toBe(false);
+          });
+
+          it('should not create a uri encoded return url', function() {
+            middleware(req, res, next);
+
+            expect(cookie.called).toBe(false);
+          });
+
+          it('should invoke the next middleware in the pipeline and allow the login page to be served w/o an infinite redirect', function() {
+            middleware(req, res, next);
+
+            expect(cookie.called).toBe(false);
+          });
+        });
+
+        describe('when the path of the current request does not match the login.local.path option', function() {
+          beforeEach(function() {
+            req = request({ path : 'login' });
+          });
+
+          it('should not invoke the next middleware in the pipeline', function() {
+            middleware(req, res, next);
+
+            expect(next.called).toBe(false);
+          });
+
+          it('should redirect to the login.local.path option', function () {
+            middleware(req, res, next);
+
+            expect(redirect.calledWithExactly('/login')).toBe(true);
+          });
+        });
+      });
+    });
+  });
+
+  describe('when a GET request is not issued', function() {
+    beforeEach(function() {
+      req = request({ path : '/session', method : 'POST' });
+      res = response({ cookie : cookie, redirect : redirect });
+      middleware = index({
+        authenticated : authenticated,
+        login : { local: { path : '/login' }  }
+      });
     });
 
-    describe('when the login.local.path option is present', function () {
-      beforeEach(function() {
-        middleware = index({
-          authenticated : authenticated,
-          login : { local: { path : '/login' }  }
-        });
-      });
+    it('should not redirect to any path or url', function () {
+      middleware(req, res, next);
 
-      describe('when the path of the current request matches the login.local.path option', function() {
-        beforeEach(function() {
-          req = request({ path : '/login' });
-        });
+      expect(redirect.called).toBe(false);
+    });
 
-        it('should not redirect to any path or url', function () {
-          middleware(req, res, next);
+    it('should not create a uri encoded return url', function() {
+      middleware(req, res, next);
 
-          expect(redirect.called).toBe(false);
-        });
+      expect(cookie.called).toBe(false);
+    });
 
-        it('should not create a uri encoded return url', function() {
-          middleware(req, res, next);
+    it('should invoke the next middleware in the pipeline and allow the login page to be served w/o an infinite redirect', function() {
+      middleware(req, res, next);
 
-          expect(cookie.called).toBe(false);
-        });
-
-        it('should invoke the next middleware in the pipeline and allow the login page to be served w/o an infinite redirect', function() {
-          middleware(req, res, next);
-
-          expect(cookie.called).toBe(false);
-        });
-      });
-
-      describe('when the path of the current request does not match the login.local.path option', function() {
-        beforeEach(function() {
-          req = request({ path : 'login' });
-        });
-
-        it('should not invoke the next middleware in the pipeline', function() {
-          middleware(req, res, next);
-
-          expect(next.called).toBe(false);
-        });
-
-        it('should redirect to the login.local.path option', function () {
-          middleware(req, res, next);
-
-          expect(redirect.calledWithExactly('/login')).toBe(true);
-        });
-      });
+      expect(cookie.called).toBe(false);
     });
   });
 });
