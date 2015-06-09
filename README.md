@@ -166,7 +166,7 @@ your login endpoint were local to your website, you'd already have to configure 
 the route(s) that are responsible for authentication). You'd additionally want to exclude `deep-link` from running on any requests to you API since
 you'd never deep link to anything accepting or returning JSON endpoints. But then @pythonesque made a point (of which was already entertained), that
 lots of sites (actually most sites according to him) are not SPAs and still employ server side rendering. In that case you have only one place to
-exclude both authentication and `deep-link` (that being login). So it concluded that this could go either way. @pythonesque made a point that it can't
+exclude both authentication and `deep-link` (that being login). So it was concluded that this could go either way. @pythonesque made a point that it can't
 hurt to guard against infinite redirects, and that the most convenient option for developers would be to allow them to blindly configure `deep-link`
 to run for all requests. The feeling was mutual and so the infinite redirect guard shall live on and reign victorious.
 
