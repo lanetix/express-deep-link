@@ -20,7 +20,7 @@ function validateOptions(options) {
 
     loginPath = options.login.local.path;
 
-    if (loginPath.indexOf('/') !== 0) {
+    if (!_.startsWith(loginPath, '/')) {
        throw new Error('the login.local.path option must begin with a foward /');
     }
   } else if (options.login.remote) {
@@ -46,7 +46,7 @@ function processAuthenticatedRequest(req, res, next, options) {
     returnUrl = decodeURIComponent(returnUrl);
 
     if (options.baseUrl) {
-      returnUrlIsRelativeToBaseUrl = returnUrl.indexOf(options.baseUrl) === 0;
+      returnUrlIsRelativeToBaseUrl = _.startsWith(returnUrl, options.baseUrl);
 
       if (!returnUrlIsRelativeToBaseUrl) {
         throw new Error('returnUrl must be relative to baseUrl.');
