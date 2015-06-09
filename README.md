@@ -143,7 +143,8 @@ loginRouter.get('/', function(req, res) {
 });
 
 loginRouter.post('/', function(req, res, next) {
-
+  // validate the user's credentials and log them
+  // in if successful
 });
 
 // only requests to /ui/* will be sent to our "router"
