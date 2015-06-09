@@ -81,6 +81,35 @@ describe('deep linking middleware', function() {
     });
   });
 
+  describe('when a GET request is issued for /favicon.ico', function() {
+    beforeEach(function() {
+      req = request({ path : '/favicon.ico' });
+      res = response({ cookie : cookie, redirect : redirect });
+      middleware = index({
+        authenticated : authenticated,
+        login : { local: { path : '/login' } }
+      });
+    });
+
+    it('should not redirect to any path or url', function () {
+      middleware(req, res, next);
+
+      expect(redirect.called).toBe(false);
+    });
+
+    it('should not create a uri encoded return url', function() {
+      middleware(req, res, next);
+
+      expect(cookie.called).toBe(false);
+    });
+
+    it('should invoke the next middleware in the pipeline', function() {
+      middleware(req, res, next);
+
+      expect(next.called).toBe(true);
+    });
+  });
+
   describe('when a GET request is issued', function() {
     describe('when the request is authenticated', function() {
       beforeEach(function() {
@@ -132,7 +161,7 @@ describe('deep linking middleware', function() {
           });
         });
 
-        describe('when the login.local.authenticated.home option is falsy', function() {
+        describe('when the login.local.authenticated.home option is falsey', function() {
           beforeEach(function() {
             localLoginOptions.local.authenticated.home = null;
           });
@@ -452,7 +481,7 @@ describe('deep linking middleware', function() {
           it('should invoke the next middleware in the pipeline and allow the login page to be served w/o an infinite redirect', function() {
             middleware(req, res, next);
 
-            expect(cookie.called).toBe(false);
+            expect(next.called).toBe(true);
           });
         });
 
@@ -502,7 +531,7 @@ describe('deep linking middleware', function() {
     it('should invoke the next middleware in the pipeline', function() {
       middleware(req, res, next);
 
-      expect(cookie.called).toBe(false);
+      expect(next.called).toBe(true);
     });
   });
 });

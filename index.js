@@ -100,10 +100,11 @@ module.exports = function(options) {
   validateOptions(options);
 
   return function(req, res, next) {
-    var authenticated = options.authenticated(req),
-        getRequestIssued = req.method.toLowerCase() === 'get';
+    var authenticated              = options.authenticated(req),
+        getRequestIssued           = req.method.toLowerCase() === 'get',
+        getRequestIssuedForFavicon = getRequestIssued && normalizePath(req.path) === '/favicon.ico/';
 
-    if (!getRequestIssued) {
+    if (!getRequestIssued || getRequestIssuedForFavicon) {
        next();
     }
     else if (authenticated) {
