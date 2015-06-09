@@ -40,7 +40,6 @@ function normalizePath(path) {
   return (_.endsWith(path, '/') ? path : path + '/').toLowerCase();
 }
 
-
 function processAuthenticatedRequest(req, res, next, options) {
   var cookieName            = (options.cookie && options.cookie.name) || 'returnUrl',
       returnUrl             = req.cookies[cookieName], returnUrlIsRelativeToBaseUrl,
