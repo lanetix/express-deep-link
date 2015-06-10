@@ -311,6 +311,39 @@ app.use(authentication);
 app.use(deepLink);
 ```
 
+## The Ultimate Edge Case
+
+your login page/route is local to your target website (`login.local` option)
+your login route is served (`deep-link` is smart enough to guard against an infinite redirect)
+your login route requests static assets (images/JavaScript, etc.) after it's been served
+`deep-link` intercepts the first request to a static asset
+`deep-link` sees that the request is unauthenticated (in the same way it was when the login route was requested)
+`deep-link` stores the request to the static asset as the return url
+`deep-link` redirects back to the login route
+the login route requests the static asset again
+....repeat
+....infinite redirect
+
+The skinny on this:
+
+For the potentially small subset of folks that decide not to in-line the assets required for login (such that they
+don't trigger additional round trips to the server), or decide not to host those assets on a CDN (again such that
+they don't trigger an additional GET request), these individuals would already have to exclude authentication for
+said assets. This means you already have to be thinking about what middleware should run for a given request.
+In this scenario, if you’re already aware that certain middleware can't blindly run for every request, then you’re
+already equipped to properly configure your middleware based on a given circumstance.
+
+Will you be using a CDN in development (in the event that you used one in production under this scenario)? Highly
+unlikely. So yes, you'd be subject to infinite redirects in development if you didn't properly scope said assets
+to a given folder. However, again, you'd also have to disable authentication for static assets in development mode.
+The point being you’re already used to thinking in this manner and you'd be aware of what you needed to do to get
+`deep-link` to play nicely with your workflow in the same way you did for your internal authentication middleware.
+I say all this to say that there's only so many out of the box cases and scenarios that `deep-link` can handle for you.
+`deep-link` will attempt do the most sensible thing it can for any scenario that it can trivially detect and could naturally
+support (i.e. the `login.local.authenticated.home` option). There comes a point where you have to have some baseline knowledge
+of how middleware work together and should be configured to suit your needs. It's not too much to ask considering the out of
+the box functionality provided by `deep-link`.
+
 ## Why a Cookie vs the Query String?
 
 So yea...you've seen some sites do the https://www.my.site.com?rUrl=someuriencodedreturnurl thing right?
