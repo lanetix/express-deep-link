@@ -357,7 +357,7 @@ to # based urls if clients load your app in a legacy browser...best of both).
 So yea...you've seen some sites do the https://www.my.site.com?rUrl=someuriencodedreturnurl thing right?
 
 ```
-// example from Google
+// example from Google....they chose not to uri encode their return url
 https://accounts.google.com/ServiceLogin?hl=en&continue=https://www.google.com/
 ```
 
