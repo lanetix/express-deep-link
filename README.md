@@ -128,7 +128,7 @@ app.use(deepLink);
 
 It probably occurred to you that you can use the express router at a very granular level. Enough so that you have absolute control
 over which routes a given middleware or set of middleware will execute for. We contemplated removing the infinite redirect guard from
-`deep-link`. The thought was that developers could just configure their middleware properly as opposed to blindly registering `deep-link` to run on
+`deep-link`. The thought was that developers could just configure their middleware properly as opposed to conveniently registering `deep-link` to run on
 every request.
 
 ```js
@@ -177,7 +177,7 @@ running on any requests to you API since you'd never deep link to anything accep
 point (of which was already entertained), that lots of sites (actually most sites according to him) are not SPAs and still employ server side rendering.
 In that case, you have only one place to exclude both authentication and `deep-link` (that being login). So it was concluded that this could go either way.
 @pythonesque made a point that it can't hurt to guard against infinite redirects, and that the most convenient option for developers would be to allow them
-to blindly configure `deep-link` to run for all requests. The feeling was mutual and so the infinite redirect guard shall live on and reign victorious.
+to conveniently configure `deep-link` to run for all requests. The feeling was mutual and so the infinite redirect guard shall live on and reign victorious.
 
 ##### login.local.authenticated - Object (Optional)
 
@@ -226,7 +226,7 @@ app.use(deepLink);
 
 ##### Why Does deep-link Provide this Option?
 
-Again, developers will most likely want to blindly configure `deep-link` to run on every request (`*`). A simple middleware could be plugged into
+Again, developers will most likely want to conveniently configure `deep-link` to run on every request (`*`). A simple middleware could be plugged into
 one's Pipeline to perform this very function, but this feature has conveniently been made available free of charge. `deep-link` is already closely tied
 to login and authentication, so might as well....
 
