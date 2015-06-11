@@ -361,12 +361,6 @@ which storage mechanism you'd like to use for persisting the url (`cookie`, `que
 ## Tests
 
 ```shell
-git clone git@github.com:armw4/express-deep-link.git
-
-cd express-deep-link
-
-npm install
-
 npm install -g gulp
 
 gulp test
