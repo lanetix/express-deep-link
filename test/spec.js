@@ -1,8 +1,9 @@
-var index    = require('../');
-var request  = require('./support/request-factory');
-var response = require('./support/response-factory');
-var sinon    = require('sinon');
-var url      = require('url');
+var index = require('../'),
+    request = require('./support/request-factory'),
+    response = require('./support/response-factory'),
+    sinon = require('sinon'),
+    url = require('url'),
+    should = require('should');
 
 describe('deep linking middleware', function() {
   var req, res, cookieOptions, next, cookie, middleware, authenticated,
@@ -18,15 +19,15 @@ describe('deep linking middleware', function() {
   });
 
   describe('when accessing the authenticated option', function() {
-    describe('when the authenticated option is falsy', function() {
+    describe('when the authenticated option is falesy', function() {
       it('should result in an exception being thrown', function() {
-        expect(function() { index({ login : '/login' }); }).toThrow();
+        (function() { index({ login : '/login' }); }).should.throw();
       });
     });
 
     describe('when authenticated is truthy', function() {
       it('should not trigger an exception', function() {
-        expect(function() { index({ authenticated : authenticated, login : { local : {  path : '/login'  } } }); }).not.toThrow();
+        (function() { index({ authenticated : authenticated, login : { local : {  path : '/login'  } } }); }).should.not.throw();
       });
     });
   });
@@ -34,49 +35,49 @@ describe('deep linking middleware', function() {
   describe('when accessing the login option', function() {
     describe('when the login option is not present', function() {
       it('should result in an exception being thrown', function() {
-        expect(function() { index({ authenticated : authenticated, login : undefined }); }).toThrow();
+        (function() { index({ authenticated : authenticated, login : undefined }); }).should.throw();
       });
     });
 
     describe('when neither the login.remote or login.local options are present', function() {
       it('should result in an exception being thrown', function() {
-        expect(function() { index({ authenticated : authenticated, login : {} }); }).toThrow();
+        (function() { index({ authenticated : authenticated, login : {} }); }).should.throw();
       });
     });
 
     describe('when both the login.remote and login.local options are present', function() {
       it('should result in an exception being thrown', function() {
-        expect(function() { index({ authenticated : authenticated, login : { remote: {}, local : {} } }); }).toThrow();
+        (function() { index({ authenticated : authenticated, login : { remote: {}, local : {} } }); }).should.throw();
       });
     });
 
     describe('when the login.remote option is present but the login.remote.url option is not present', function() {
       it('should result in an exception being thrown', function() {
-        expect(function() { index({ authenticated : authenticated, login : { remote: {} } }); }).toThrow();
+        (function() { index({ authenticated : authenticated, login : { remote: {} } }); }).should.throw();
       });
     });
 
     describe('when the login.remote option is present and the login.remote.url option is present', function() {
       it('should not result in an exception being thrown', function() {
-        expect(function() { index({ authenticated : authenticated, login : { remote: { url : 'https://www.hotwire.com' } } }); }).not.toThrow();
+        (function() { index({ authenticated : authenticated, login : { remote: { url : 'https://www.hotwire.com' } } }); }).should.not.throw();
       });
     });
 
     describe('when the login.local option is present but the login.local.path option is not present', function() {
       it('should result in an exception being thrown', function() {
-        expect(function() { index({ authenticated : authenticated, login : { local : {} } }); }).toThrow();
+        (function() { index({ authenticated : authenticated, login : { local : {} } }); }).should.throw();
       });
     });
 
     describe('when the login.local option is present but the login.local.path does not begin with a forward slash', function() {
       it('should result in an exception being thrown', function() {
-        expect(function() { index({ authenticated : authenticated, login : { local : { path : 'login' } } }); }).toThrow();
+        (function() { index({ authenticated : authenticated, login : { local : { path : 'login' } } }); }).should.throw();
       });
     });
 
     describe('when the login.local option is present and the login.local.path option begins with a forward slash', function() {
       it('should not result in an exception being thrown', function() {
-        expect(function() { index({ authenticated : authenticated, login : { local : { path : '/login' } } }); }).not.toThrow();
+        (function() { index({ authenticated : authenticated, login : { local : { path : '/login' } } }); }).should.not.throw();
       });
     });
   });
@@ -94,19 +95,19 @@ describe('deep linking middleware', function() {
     it('should not redirect to any path or url', function () {
       middleware(req, res, next);
 
-      expect(redirect.called).toBe(false);
+      redirect.called.should.be.false;
     });
 
     it('should not create a uri encoded return url', function() {
       middleware(req, res, next);
 
-      expect(cookie.called).toBe(false);
+      cookie.called.should.be.false;
     });
 
     it('should invoke the next middleware in the pipeline', function() {
       middleware(req, res, next);
 
-      expect(next.called).toBe(true);
+      next.called.should.be.true;
     });
   });
 
@@ -133,13 +134,13 @@ describe('deep linking middleware', function() {
           it('should not invoke the next middleware in the pipeline', function() {
             middleware(req, res, next);
 
-            expect(next.called).toBe(false);
+            next.called.should.be.false;
           });
 
           it('should prevent the login page from being served to authenticated users and redirect to the login.local.authenticated.home option', function() {
             middleware(req, res, next);
 
-            expect(redirect.calledWithExactly('/my/home/route')).toBe(true);
+            redirect.calledWithExactly('/my/home/route').should.be.true;
           });
         });
 
@@ -151,13 +152,13 @@ describe('deep linking middleware', function() {
           it('should not invoke the next middleware in the pipeline', function() {
             middleware(req, res, next);
 
-            expect(next.called).toBe(false);
+            next.called.should.be.false;
           });
 
           it('should prevent the login page from being served to authenticated users and redirect to the / (root) url', function() {
             middleware(req, res, next);
 
-            expect(redirect.calledWithExactly('/')).toBe(true);
+            redirect.calledWithExactly('/').should.be.true;
           });
         });
 
@@ -169,13 +170,13 @@ describe('deep linking middleware', function() {
           it('should not redirect', function() {
             middleware(req, res, next);
 
-            expect(redirect.called).toBe(false);
+            redirect.called.should.be.false;
           });
 
           it('should invoke the next middleware in the pipeline and allow the login page to be potentially served to authenticated users', function() {
             middleware(req, res, next);
 
-            expect(next.calledOnce).toBe(true);
+            next.calledOnce.should.be.true;
           });
         });
 
@@ -187,13 +188,13 @@ describe('deep linking middleware', function() {
           it('should not redirect', function() {
             middleware(req, res, next);
 
-            expect(redirect.called).toBe(false);
+            redirect.called.should.be.false;
           });
 
           it('should invoke the next middleware in the pipeline and allow the login page to be potentially served to authenticated users', function() {
             middleware(req, res, next);
 
-            expect(next.calledOnce).toBe(true);
+            next.calledOnce.should.be.true;
           });
         });
 
@@ -205,13 +206,13 @@ describe('deep linking middleware', function() {
           it('should not redirect', function() {
             middleware(req, res, next);
 
-            expect(redirect.called).toBe(false);
+            redirect.called.should.be.false;
           });
 
           it('should invoke the next middleware in the pipeline and allow the login page to be potentially served to authenticated users', function() {
             middleware(req, res, next);
 
-            expect(next.calledOnce).toBe(true);
+            next.called.should.be.true;
           });
         });
       });
@@ -230,7 +231,7 @@ describe('deep linking middleware', function() {
         it('should purge the return url from the response using the name of the cookie provided by the cookie option', function() {
           middleware(req, res, next);
 
-          expect(clearCookie.calledWithExactly('BLAH')).toBe(true);
+          clearCookie.calledWithExactly('BLAH').should.be.true;
         });
       });
 
@@ -247,7 +248,7 @@ describe('deep linking middleware', function() {
         it('should purge the return url from the response using the default cookie name', function() {
           middleware(req, res, next);
 
-          expect(clearCookie.calledWithExactly('returnUrl')).toBe(true);
+          clearCookie.calledWithExactly('returnUrl').should.be.true;
         });
       });
 
@@ -264,13 +265,13 @@ describe('deep linking middleware', function() {
         it('should not invoke the next middleware in the pipeline', function() {
           middleware(req, res, next);
 
-          expect(next.called).toBe(false);
+          next.called.should.be.false;
         });
 
         it('should redirect to the return url without verifying that the return url is relative to any particular url', function() {
           middleware(req, res, next);
 
-          expect(redirect.calledWithExactly('http://i.hack.you.com/via/xss')).toBe(true);
+          redirect.calledWithExactly('http://i.hack.you.com/via/xss').should.be.true;
         });
       });
 
@@ -292,13 +293,13 @@ describe('deep linking middleware', function() {
           });
 
           it('should not invoke the next middleware in the pipeline', function() {
-            expect(next.called).toBe(false);
+            next.called.should.be.false;
           });
 
           it('should redirect to the return url', function() {
             middleware(req, res, next);
 
-            expect(redirect.calledWithExactly(url.resolve(BASE_URL, 'the/booty-butt-naked/truth'))).toBe(true);
+            redirect.calledWithExactly(url.resolve(BASE_URL, 'the/booty-butt-naked/truth')).should.be.true;
           });
         });
 
@@ -316,15 +317,15 @@ describe('deep linking middleware', function() {
           it('should not redirect to the invalid return url', function() {
             try { middleware(req, res, next); } catch(e) { }
 
-            expect(redirect.called).toBe(false);
+            redirect.called.should.be.false;
           });
 
           it('should not invoke the next middleware in the pipeline', function() {
-            expect(next.called).toBe(false);
+            next.called.should.be.false;
           });
 
           it('should result in an exception being thrown', function() {
-            expect(function() { middleware(req, res, next); }).toThrow();
+            (function() { middleware(req, res, next); }).should.throw();
           });
         });
       });
@@ -341,19 +342,19 @@ describe('deep linking middleware', function() {
         it('should not redirect', function() {
           middleware(req, res, next);
 
-          expect(redirect.called).toBe(false);
+          redirect.called.should.be.false;
         });
 
         it('should not purge the non existent return url from the response', function() {
           middleware(req, res, next);
 
-          expect(clearCookie.called).toBe(false);
+          clearCookie.called.should.be.false;
         });
 
         it('should invoke the next middleware in the pipeline', function() {
           middleware(req, res, next);
 
-          expect(next.calledOnce).toBe(true);
+          next.calledOnce.should.be.true;
         });
       });
     });
@@ -379,7 +380,7 @@ describe('deep linking middleware', function() {
         it('should create a uri encoded return url using the original url of the request and allow the default cookie settings to be overriden', function() {
           middleware(req, res, next);
 
-          expect(cookie.calledWithExactly('BLAH', '%2Fsearch%3Fq%3Dsomething', cookieOptions)).toBe(true);
+          cookie.calledWithExactly('BLAH', '%2Fsearch%3Fq%3Dsomething', cookieOptions).should.be.true;
         });
       });
 
@@ -397,7 +398,7 @@ describe('deep linking middleware', function() {
         it('should create a uri encoded return url using the base url and the original url of the request and allow the default cookie settings to be overriden', function() {
           middleware(req, res, next);
 
-          expect(cookie.calledWithExactly('BLAH', 'https%3A%2F%2Fwww.contoso.com%2Fsearch%3Fq%3Dsomething', cookieOptions)).toBe(true);
+          cookie.calledWithExactly('BLAH', 'https%3A%2F%2Fwww.contoso.com%2Fsearch%3Fq%3Dsomething', cookieOptions).should.be.true;
         });
       });
 
@@ -412,7 +413,7 @@ describe('deep linking middleware', function() {
         it('should create a uri encoded return url using the original url of the request and the default cookie settings', function() {
           middleware(req, res, next);
 
-          expect(cookie.calledWithExactly('returnUrl', '%2Fsearch%3Fq%3Dsomething', DEFAULT_COOKIE_OPTIONS)).toBe(true);
+          cookie.calledWithExactly('returnUrl', '%2Fsearch%3Fq%3Dsomething', DEFAULT_COOKIE_OPTIONS).should.be.true;
         });
       });
 
@@ -428,7 +429,7 @@ describe('deep linking middleware', function() {
         it('should create a uri encoded return url using the base url and the original url of the request and the default cookie settings', function() {
           middleware(req, res, next);
 
-          expect(cookie.calledWithExactly('returnUrl', 'https%3A%2F%2Fwww.contoso.com%2Fsearch%3Fq%3Dsomething', DEFAULT_COOKIE_OPTIONS)).toBe(true);
+          cookie.calledWithExactly('returnUrl', 'https%3A%2F%2Fwww.contoso.com%2Fsearch%3Fq%3Dsomething', DEFAULT_COOKIE_OPTIONS).should.be.true;
         });
       });
 
@@ -443,13 +444,13 @@ describe('deep linking middleware', function() {
         it('should not invoke the next middleware in the pipeline', function() {
           middleware(req, res, next);
 
-          expect(next.called).toBe(false);
+          next.called.should.be.false;
         });
 
         it('should redirect to the login.remote.url option', function () {
           middleware(req, res, next);
 
-          expect(redirect.calledWithExactly('https://my.secure.site.com/')).toBe(true);
+          redirect.calledWithExactly('https://my.secure.site.com/').should.be.true;
         });
       });
 
@@ -469,19 +470,19 @@ describe('deep linking middleware', function() {
           it('should not redirect to any path or url', function () {
             middleware(req, res, next);
 
-            expect(redirect.called).toBe(false);
+            redirect.called.should.be.false;
           });
 
           it('should not create a uri encoded return url', function() {
             middleware(req, res, next);
 
-            expect(cookie.called).toBe(false);
+            cookie.called.should.be.false;
           });
 
           it('should invoke the next middleware in the pipeline and allow the login page to be served w/o an infinite redirect', function() {
             middleware(req, res, next);
 
-            expect(next.called).toBe(true);
+            next.called.should.be.true;
           });
         });
 
@@ -493,13 +494,13 @@ describe('deep linking middleware', function() {
           it('should not invoke the next middleware in the pipeline', function() {
             middleware(req, res, next);
 
-            expect(next.called).toBe(false);
+            next.called.should.be.false;
           });
 
           it('should redirect to the login.local.path option', function () {
             middleware(req, res, next);
 
-            expect(redirect.calledWithExactly('/login')).toBe(true);
+            redirect.calledWithExactly('/login').should.be.true;
           });
         });
       });
@@ -519,19 +520,19 @@ describe('deep linking middleware', function() {
     it('should not redirect to any path or url', function () {
       middleware(req, res, next);
 
-      expect(redirect.called).toBe(false);
+      redirect.called.should.be.false;
     });
 
     it('should not create a uri encoded return url', function() {
       middleware(req, res, next);
 
-      expect(cookie.called).toBe(false);
+      cookie.called.should.be.false;
     });
 
     it('should invoke the next middleware in the pipeline', function() {
       middleware(req, res, next);
 
-      expect(next.called).toBe(true);
+      next.called.should.be.true;
     });
   });
 });
