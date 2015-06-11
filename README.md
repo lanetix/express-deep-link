@@ -242,7 +242,9 @@ https://login.contoso.com)
 
 as opposed to your target website (the one you'll be deep linking into):
 
+```
 https://contoso.com/login
+```
 
 ##### login.remote.url - String (Required if using login.remote)
 
