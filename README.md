@@ -328,9 +328,9 @@ The skinny on this:
 
 For the potentially small subset of folks that decide not to in-line the assets required for login (such that they
 don't trigger additional round trips to the server), or decide not to host those assets on a CDN (again such that
-they don't trigger an additional GET request), these individuals would already have to exclude authentication for
+they don't trigger an additional GET request to the local server), these individuals would already have to exclude authentication for
 said assets. This means you already have to be thinking about what middleware should run for a given request.
-In this scenario, if you’re already aware that certain middleware can't blindly run for every request, then you’re
+Under this scenario, if you’re already aware that certain middleware can't blindly run for every request, then you’re
 already equipped to properly configure your middleware based on a given circumstance.
 
 Will you be using a CDN in development (in the event that you used one in production under this scenario)? Highly
