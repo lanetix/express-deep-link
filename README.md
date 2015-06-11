@@ -2,7 +2,7 @@ Compatible with [express 4.x](http://expressjs.com/4x/api.html).
 
 ## What is Deep Linking?
 
-Deep linking occurs when users accesses a url of arbitrary depth on your website. As noted on Wikipedia,
+Deep linking occurs when users access a url of arbitrary depth on your website. As noted on Wikipedia,
 it's the difference between www.my.site.com/ (the root of the website) and www.my.site.com/some-url/of/arbitrary/depth (a deep linked
 url). Deep linking is a given for public unauthenticated websites. There's nothing special you have to do in order to get it to work.
 However, once authentication comes into play, you'll need to know where an unauthenticated user was attempting to go after they've logged
