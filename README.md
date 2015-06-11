@@ -313,9 +313,9 @@ app.use(deepLink);
 
 ## The Ultimate Edge Case
 
-1. your login page/route is local to your target website (`login.local` option)
-2. your login route is served (`deep-link` is smart enough to guard against an infinite redirect)
-3. your login route requests static assets (images/JavaScript, etc.) after it's been served
+1. your login page is local to your target website (`login.local` option)
+2. your login page is served to the browser (`deep-link` is smart enough to prevent an infinite redirect)
+3. your login page requests static assets (images/JavaScript, etc.) after it's been served
 4. `deep-link` intercepts the first request to a static asset
 5. `deep-link` sees that the request is unauthenticated (in the same way it was when the login route was requested)
 6. `deep-link` stores the request to the static asset as the return url
