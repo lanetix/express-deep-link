@@ -344,6 +344,14 @@ support (i.e. the `login.local.authenticated.home` option). There comes a point 
 of how middleware work together and should be configured to suit your needs. It's not too much to ask considering the out of
 the box functionality provided by `deep-link`.
 
+## Beware Thy Hash (#)
+
+If you're attempting to deep link to a url like http://my.site.com/accounts/#/new (as you would in some SPA), your browser
+will not transmit anything after the # (hash). It would issue a request to http://my.site.com/accounts, and the remainder
+of the url would be truncated. Keep this in mind when using something like Angular. Angular for example has the concept of
+HTML 5 Mode (pretty urls that don't contain a #). You'd want to configure your app as such (Angular is smart enough to downgrade
+to # based urls if clients load your app in a legacy browser...best of both).
+
 ## Why a Cookie vs the Query String?
 
 So yea...you've seen some sites do the https://www.my.site.com?rUrl=someuriencodedreturnurl thing right?
@@ -353,7 +361,7 @@ So yea...you've seen some sites do the https://www.my.site.com?rUrl=someuriencod
 https://accounts.google.com/ServiceLogin?hl=en&continue=https://www.google.com/
 ```
 
-We could certainly code `deep-link` to do the same, but the cookie based approach is cleaner and not as
+We could certainly implement `deep-link` to do the same, but the cookie based approach is cleaner and not as
 trivial to tamper with (the motive for the `baseUrl` option). It can certainly be done either way, but this is our current
 stance on the matter. Maybe a `strategy` option of some sort could be introduced to let you pick
 which storage mechanism you'd like to use for persisting the url (`cookie`, `query-string`). To be continued...
