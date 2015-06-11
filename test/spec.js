@@ -11,10 +11,10 @@ describe('deep linking middleware', function() {
 
   beforeEach(function() {
     authenticated = sinon.stub();
-    next          = sinon.spy();
-    redirect      = sinon.spy();
-    clearCookie   = sinon.spy();
-    cookie        = sinon.spy();
+    next = sinon.spy();
+    redirect = sinon.spy();
+    clearCookie = sinon.spy();
+    cookie = sinon.spy();
   });
 
   describe('when accessing the authenticated option', function() {
@@ -121,8 +121,8 @@ describe('deep linking middleware', function() {
       describe('when there is no return url, and the request path is equal to the login.local.path option', function() {
         beforeEach(function() {
           localLoginOptions = { local : { path : '/login', authenticated : {} } };
-          middleware        = index({ authenticated : authenticated, login : localLoginOptions  });
-          req               = request({ path : '/loGIN/' });
+          middleware = index({ authenticated : authenticated, login : localLoginOptions  });
+          req = request({ path : '/loGIN/' });
         });
 
         describe('when the login.local.authenticated.home option is a string', function() {
@@ -218,8 +218,8 @@ describe('deep linking middleware', function() {
 
       describe('when a return url is present and the cookie.name option is present', function() {
         beforeEach(function() {
-          returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
-          req        = request({ cookies : { 'BLAH' : returnUrl }, path : '/home' });
+          returnUrl = encodeURIComponent('http://i.hack.you.com/via/xss');
+          req = request({ cookies : { 'BLAH' : returnUrl }, path : '/home' });
           middleware = index({
             authenticated : authenticated,
             cookie: { name : 'BLAH' },
@@ -236,8 +236,8 @@ describe('deep linking middleware', function() {
 
       describe('when a return url is present and the cookie.name option is not present', function() {
         beforeEach(function() {
-          returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
-          req        = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
+          returnUrl = encodeURIComponent('http://i.hack.you.com/via/xss');
+          req = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
           middleware = index({
             authenticated : authenticated,
             login : { local : { path : '/login', authenticated : { home : true  } } }
@@ -253,8 +253,8 @@ describe('deep linking middleware', function() {
 
       describe('when no baseUrl option is present', function() {
         beforeEach(function() {
-          returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
-          req        = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
+          returnUrl = encodeURIComponent('http://i.hack.you.com/via/xss');
+          req = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
           middleware = index({
             authenticated : authenticated,
             login : { local : { path : '/login', authenticated : { home : true } } }
@@ -276,8 +276,8 @@ describe('deep linking middleware', function() {
 
       describe('when the baseUrl option is present', function() {
         beforeEach(function() {
-          returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
-          req        = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
+          returnUrl = encodeURIComponent('http://i.hack.you.com/via/xss');
+          req = request({ cookies : { returnUrl : returnUrl }, path : '/home' });
           middleware = index({
             authenticated : authenticated,
             login : { local : { path : '/login', authenticated : { home : true } } },
@@ -288,7 +288,7 @@ describe('deep linking middleware', function() {
         describe('when a return url that is relative to the baseUrl option is present', function() {
           beforeEach(function() {
             returnUrl = encodeURIComponent(url.resolve(BASE_URL, 'the/booty-butt-naked/truth'));
-            req       = request({ cookies : { returnUrl : returnUrl } });
+            req = request({ cookies : { returnUrl : returnUrl } });
           });
 
           it('should not invoke the next middleware in the pipeline', function() {
@@ -304,8 +304,8 @@ describe('deep linking middleware', function() {
 
         describe('when a return url that is not relative to the baseUrl option is present', function() {
           beforeEach(function() {
-            returnUrl  = encodeURIComponent('http://i.hack.you.com/via/xss');
-            req        = request({ cookies : { returnUrl : returnUrl } });
+            returnUrl = encodeURIComponent('http://i.hack.you.com/via/xss');
+            req = request({ cookies : { returnUrl : returnUrl } });
             middleware = index({
               authenticated : authenticated,
               baseUrl : BASE_URL,
@@ -369,7 +369,7 @@ describe('deep linking middleware', function() {
       describe('when the cookie option is present (irrespective of the local or remote options)', function() {
         beforeEach(function() {
           cookieOptions = { secure : true, httpOnly : false };
-          middleware    = index({
+          middleware = index({
             authenticated : authenticated,
             cookie : { name : 'BLAH', options : cookieOptions },
             login : { local : { path : '/login' } }
@@ -386,7 +386,7 @@ describe('deep linking middleware', function() {
       describe('when the cookie option is present and the baseUrl option is present (irrespective of the local or remote options)', function() {
         beforeEach(function() {
           cookieOptions = { secure : true, httpOnly : false };
-          middleware    = index({
+          middleware = index({
             authenticated : authenticated,
             cookie : { name : 'BLAH', options : cookieOptions },
             login : { local : { path : '/login' } },

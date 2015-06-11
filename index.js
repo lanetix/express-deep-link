@@ -1,4 +1,4 @@
-var _   = require('lodash'),
+var _ = require('lodash'),
     url = require('url');
 
 function validateOptions(options) {
@@ -41,11 +41,11 @@ function normalizePath(path) {
 }
 
 function processAuthenticatedRequest(req, res, next, options) {
-  var cookieName            = (options.cookie && options.cookie.name) || 'returnUrl',
-      returnUrl             = req.cookies[cookieName], returnUrlIsRelativeToBaseUrl,
+  var cookieName = (options.cookie && options.cookie.name) || 'returnUrl',
+      returnUrl = req.cookies[cookieName], returnUrlIsRelativeToBaseUrl,
       normalizedRequestPath = normalizePath(req.path),
-      home                  = options.login.local && normalizedRequestPath === normalizePath(options.login.local.path)
-                              && options.login.local.authenticated && options.login.local.authenticated.home;
+      home = options.login.local && normalizedRequestPath === normalizePath(options.login.local.path)
+             && options.login.local.authenticated && options.login.local.authenticated.home;
 
   if (returnUrl) {
     returnUrl = decodeURIComponent(returnUrl);
@@ -72,10 +72,10 @@ function processAuthenticatedRequest(req, res, next, options) {
 }
 
 function processUnauthenticatedRequest(req, res, next, options) {
-  var cookieName             = (options.cookie && options.cookie.name) || 'returnUrl',
-    normalizedRequestPath    = normalizePath(req.path),
+  var cookieName = (options.cookie && options.cookie.name) || 'returnUrl',
+    normalizedRequestPath = normalizePath(req.path),
     localLoginRouteRequested = options.login.local && normalizedRequestPath === normalizePath(options.login.local.path),
-    DEFAULT_COOKIE_OPTIONS   = { httpOnly : true }, loginUrl;
+    DEFAULT_COOKIE_OPTIONS = { httpOnly : true }, loginUrl;
 
   if (options.login.local) {
     loginUrl = options.login.local.path;
@@ -87,7 +87,7 @@ function processUnauthenticatedRequest(req, res, next, options) {
     next();
   } else {
     var cookieOptions = (options.cookie && options.cookie.options) || {},
-        returnUrl     = options.baseUrl ? url.resolve(options.baseUrl, req.originalUrl) : req.originalUrl;
+        returnUrl = options.baseUrl ? url.resolve(options.baseUrl, req.originalUrl) : req.originalUrl;
 
     cookieOptions = _.defaults(cookieOptions, DEFAULT_COOKIE_OPTIONS);
 
@@ -100,8 +100,8 @@ module.exports = function(options) {
   validateOptions(options);
 
   return function(req, res, next) {
-    var authenticated              = options.authenticated(req),
-        getRequestIssued           = req.method.toLowerCase() === 'get',
+    var authenticated = options.authenticated(req),
+        getRequestIssued = req.method.toLowerCase() === 'get',
         getRequestIssuedForFavicon = getRequestIssued && normalizePath(req.path) === '/favicon.ico/';
 
     if (!getRequestIssued || getRequestIssuedForFavicon) {

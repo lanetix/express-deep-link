@@ -23,11 +23,11 @@
   },
   "homepage": "https://github.com/armw4/express-deep-link",
   "dependencies": {
-    "gulp": "^3.8.11",
-    "lodash": "^3.9.3"
+    "gulp": "3.8.11",
+    "lodash": "3.9.3"
   },
   "devDependencies": {
-    "gulp-jasmine": "^2.0.1",
-    "sinon": "^1.14.1"
+    "gulp-mocha": "2.1.1",
+    "sinon": "1.14.1"
   }
 }
