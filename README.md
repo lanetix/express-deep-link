@@ -170,14 +170,14 @@ app.use('/api', apiRouter);
 app.use('/login', loginRouter);
 ```
 
-So yea...the onus could definitely be offloaded onto developers to properly partition their middleware via the express `Router`. The initial argument for this was that if
-your login endpoint were local to your website, you'd already have to configure your authentication middleware not to run for that endpoint (you can't authenticate
-the route(s) that are responsible for authentication). You'd additionally want to exclude `deep-link` from running on any requests to you API since
-you'd never deep link to anything accepting or returning JSON endpoints. But then @pythonesque made a point (of which was already entertained), that
-lots of sites (actually most sites according to him) are not SPAs and still employ server side rendering. In that case you have only one place to
-exclude both authentication and `deep-link` (that being login). So it was concluded that this could go either way. @pythonesque made a point that it can't
-hurt to guard against infinite redirects, and that the most convenient option for developers would be to allow them to blindly configure `deep-link`
-to run for all requests. The feeling was mutual and so the infinite redirect guard shall live on and reign victorious.
+We could certainly put the burden  of properly partioning/configuring middleware on the backs of developers. The initial argument for this was that if
+your login endpoint were local to your website, you'd already have to configure your authentication middleware not to authenticate that endpoint (you can't authenticate
+the route(s) that are responsible for authentication else users would never be able to authenticate). You'd additionally want to exclude `deep-link` from
+running on any requests to you API since you'd never deep link to anything accepting or returning JSON endpoints. But then @pythonesque made a
+point (of which was already entertained), that lots of sites (actually most sites according to him) are not SPAs and still employ server side rendering.
+In that case, you have only one place to exclude both authentication and `deep-link` (that being login). So it was concluded that this could go either way.
+@pythonesque made a point that it can't hurt to guard against infinite redirects, and that the most convenient option for developers would be to allow them
+to blindly configure `deep-link` to run for all requests. The feeling was mutual and so the infinite redirect guard shall live on and reign victorious.
 
 ##### login.local.authenticated - Object (Optional)
 
@@ -372,7 +372,7 @@ to # based urls if clients load your app in a legacy browser...best of both).
 
 ## Why a Cookie vs the Query String?
 
-So yea...you've seen some sites do the https://www.my.site.com?rUrl=someuriencodedreturnurl thing right?
+You've probably seen some sites do the https://www.my.site.com?rUrl=someuriencodedreturnurl thing right?
 
 ```
 // example from Google....they chose not to uri encode their return url
