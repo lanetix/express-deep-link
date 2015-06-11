@@ -126,7 +126,7 @@ app.use(deepLink);
 
 ##### Why Does deep link Guard Against Infinite Redirects?
 
-It well known that you can use the express router at a very granular level. Enough so that you have absolute control
+It's well known that you can use the express router at a very granular level. Enough so that you have absolute control
 over which routes a given middleware or set of middleware will execute for. We contemplated removing the infinite redirect guard from
 `deep-link`. The thought was that developers could take time out to properly configure their middleware as opposed to registering `deep-link`
 to run on every request:
