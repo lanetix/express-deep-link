@@ -9,7 +9,7 @@ function validateOptions(options) {
     throw new Error('the login option is required.');
   }
 
-  if(localAndRemoteLoginAreBothProvided) {
+  if (localAndRemoteLoginAreBothProvided) {
     throw new Error('the login.local and login.remote options are mutually exclusive (exactly one should be provided).');
   }
 
