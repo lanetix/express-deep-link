@@ -1,6 +1,6 @@
 {
   "name": "express-deep-link",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Provides deep linking capabilities via express middleware.",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com:armw4/express-deep-link.git"
+    "url": "https://github.com:lanetix/express-deep-link.git"
   },
   "keywords": [
     "deep",
@@ -19,9 +19,9 @@
   "author": "@armw4",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/armw4/express-deep-link/issues"
+    "url": "https://github.com/lanetix/express-deep-link/issues"
   },
-  "homepage": "https://github.com/armw4/express-deep-link",
+  "homepage": "https://github.com/lanetix/express-deep-link",
   "dependencies": {
     "gulp": "3.8.11",
     "lodash": "3.9.3"
