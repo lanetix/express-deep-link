@@ -8,7 +8,7 @@ url). Deep linking is a given for public unauthenticated websites. There's nothi
 However, once authentication comes into play, you'll need to know where an unauthenticated user was attempting to go after they've logged
 in to your website:
 
-1. Susie gets a link to you site from Brad (www.your.site.com/some/path/other-than/the-root-url)
+1. Susie gets a link to your site from Brad (www.your.site.com/some/path/other-than/the-root-url)
 2. Susie clicks on this link
 3. Susie is not authenticated and gets redirected to login and prompted for her credentials
 4. Instead of getting blindly sent to the root of the website (/), Susie is sent to where she was initially attempting to go before she was prompted to login.
@@ -105,9 +105,9 @@ https://login.contoso.com
 
 This is the request path (equivalent to the `req.path` property of an express request) of the local login endpoint.
 **It should always begin with a forward `/`** as [depicted in the express docs](http://expressjs.com/api.html#req.path).
-Why is this option important? When the path of the current request is equal to this value, we will blindly allow the
-request to pass through (without a redirect) so as to avoid infinite redirects. We should not be redirecting you to the
-login page if you're actually trying to visit the login page...feel my drift?
+Why is this option important? When the path of the current request is equal to this value, `deep-link` will allow the
+request to pass through (without a redirect) so as to avoid infinite redirects. `deep-link` should not redirect you to the
+login page if you're actually trying to visit the login page...:facepunch:.
 
 ```js
 var deep     = require('express-deep-link');
@@ -126,10 +126,10 @@ app.use(deepLink);
 
 ##### Why Does deep link Guard Against Infinite Redirects?
 
-It probably occurred to you that you can use the express router at a very granular level. Enough so that you have absolute control
+It well known that you can use the express router at a very granular level. Enough so that you have absolute control
 over which routes a given middleware or set of middleware will execute for. We contemplated removing the infinite redirect guard from
-`deep-link`. The thought was that developers could just configure their middleware properly as opposed to conveniently registering `deep-link` to run on
-every request.
+`deep-link`. The thought was that developers could take time out to properly configure their middleware as opposed to registering `deep-link`
+to run on every request:
 
 ```js
 var express     = require('express');
@@ -170,14 +170,14 @@ app.use('/api', apiRouter);
 app.use('/login', loginRouter);
 ```
 
-We could certainly put the burden  of properly partioning/configuring middleware on the backs of developers. The initial argument for this was that if
-your login endpoint were local to your website, you'd already have to configure your authentication middleware not to authenticate that endpoint (you can't authenticate
-the route(s) that are responsible for authentication else users would never be able to authenticate). You'd additionally want to exclude `deep-link` from
-running on any requests to you API since you'd never deep link to anything accepting or returning JSON endpoints. But then @pythonesque made a
-point (of which was already entertained), that lots of sites (actually most sites according to him) are not SPAs and still employ server side rendering.
-In that case, you have only one place to exclude both authentication and `deep-link` (that being login). So it was concluded that this could go either way.
-@pythonesque made a point that it can't hurt to guard against infinite redirects, and that the most convenient option for developers would be to allow them
-to conveniently configure `deep-link` to run for all requests. The feeling was mutual and so the infinite redirect guard shall live on and reign victorious.
+The initial argument for this was that if your login endpoint were local to your website, you'd already have to configure your authentication middleware
+not to authenticate that endpoint (you can't authenticate the route that is responsible for authentication, else users would never be able to authenticate).
+You'd additionally want to exclude `deep-link` from running on any requests to your API since you'd never deep link to anything accepting or returning JSON payloads.
+@pythonesque made an argument (of which was already entertained) that lots of sites (actually most sites according to him) are not SPAs and still employ
+server side rendering. In that case, you have only one place to exclude both authentication and `deep-link` (that being login). We concluded that:
+
+1. there's no harm in guarding against infinite redirects
+2. the most convenient option for developers would be to allow them to configure `deep-link` to run for all requests
 
 ##### login.local.authenticated - Object (Optional)
 
@@ -248,8 +248,8 @@ https://contoso.com/login
 
 ##### login.remote.url - String (Required if using login.remote)
 
-This is the remote endpoint we'll redirect any unauthenticated requests to. This is different from local configuration
-as no redirect will be necessary.
+This is the remote endpoint `deep-link` will redirect any unauthenticated requests to. This dffers from the `login.local` option
+as `login.local` does not require redirects and allows a login page to be served from an endpoint relative to the site you're deep linking to.
 
 ```js
 var deep     = require('express-deep-link');
@@ -346,41 +346,35 @@ For the potentially small subset of folks that decide not to in-line the assets 
 don't trigger additional round trips to the server), or decide not to host those assets on a CDN (again such that
 they don't trigger an additional GET request to the local server), these individuals would already have to exclude authentication for
 said assets. This means you already have to be thinking about what middleware should run for a given request.
-Under this scenario, if you’re already aware that certain middleware can't blindly run for every request, then you’re
-already equipped to properly configure your middleware based on a given circumstance.
+We trust that based on this, you're adequately equipped to configure middleware to conform to your expectations.
 
 Will you be using a CDN in development (in the event that you used one in production under this scenario)? Highly
-unlikely. So yes, you'd be subject to infinite redirects in development if you didn't properly scope said assets
-to a given folder. However, again, you'd also have to disable authentication for static assets in development mode.
-The point being you’re already used to thinking in this manner and you'd be aware of what you needed to do to get
-`deep-link` to play nicely with your workflow in the same way you did for your internal authentication middleware.
-I say all this to say that there's only so many out of the box cases and scenarios that `deep-link` can handle for you.
-`deep-link` will attempt do the most sensible thing it can for any scenario that it can trivially detect and could naturally
-support (i.e. the `login.local.authenticated.home` option). There comes a point where you have to have some baseline knowledge
-of how middleware work together and should be configured to suit your needs. It's not too much to ask considering the out of
-the box functionality provided by `deep-link`.
+unlikely. That being said, you'd be subject to infinite redirects in development if you didn't properly scope your
+local login assets to a given folder. However, at a minimum you'd still have to disable authentication for your local login
+assets in development mode. Put simply, you’re already used to thinking outside of the box when it comes to configuring your middleware.
+In conclusion, there's a limit to how much functionality `deep-link` can provide out of the box. `deep-link` will attempt do the most sensible thing it can
+for any condition that it can trivially detect and naturally support (i.e. the `login.local.authenticated.home` option). There comes a point where one
+must have basic knowledge of how middleware work relative to one another and the potential ramifications of a given configuration.
 
 ## Beware Thy Hash (#)
 
-If you're attempting to deep link to a url like http://my.site.com/accounts/#/new (as you would in some SPA), your browser
-will not transmit anything after the # (hash). It would issue a request to http://my.site.com/accounts, and the remainder
-of the url would be truncated. Keep this in mind when using something like Angular. Angular for example has the concept of
-HTML 5 Mode (pretty urls that don't contain a #). You'd want to configure your app as such (Angular is smart enough to downgrade
-to # based urls if clients load your app in a legacy browser...best of both).
+If you're attempting to deep link to a url like http://my.site.com/accounts/#/new (as you would in a SPA), your browser will truncate all characters after
+the # (hash) before issuing a request which would result in a request to http://my.site.com/accounts. Keep this in mind when using a UI framework such as Angular.
+Angular for example has the concept of HTML 5 Mode (pretty urls that don't contain a #). You'd want to configure your app as such (Angular is smart enough to downgrade
+to # based urls if clients load your app in a legacy browser...best of both :earth_americas:s).
 
 ## Why a Cookie vs the Query String?
 
-You've probably seen some sites do the https://www.my.site.com?rUrl=someuriencodedreturnurl thing right?
+You've probably witnessed some sites do the https://www.my.site.com?rUrl=someuriencodedreturnurl thing right?
 
 ```
 // example from Google....they chose not to uri encode their return url
 https://accounts.google.com/ServiceLogin?hl=en&continue=https://www.google.com/
 ```
 
-We could certainly implement `deep-link` to do the same, but the cookie based approach is cleaner and not as
-trivial to tamper with (the motive for the `baseUrl` option). It can certainly be done either way, but this is our current
-stance on the matter. Maybe a `strategy` option of some sort could be introduced to let you pick
-which storage mechanism you'd like to use for persisting the url (`cookie`, `query-string`). To be continued...
+We could certainly implement `deep-link` to do the same, but the cookie based approach is much easier on the eyes (doesn't pollute the query sting) and not as
+trivial to tamper with (the motive for the `baseUrl` option). Maybe a `strategy` option of some sort could be introduced to let you pick which storage mechanism
+you'd like to use for persisting the url (`cookie`, `query-string`). To be continued...
 
 ## Tests
 
