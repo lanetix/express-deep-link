@@ -226,7 +226,7 @@ app.use(deepLink);
 
 ##### Why Does deep-link Provide this Option?
 
-Again, developers will most likely want to ignorantly configure `deep-link` to run on every request (`*`). A simple middleware could be plugged into
+Again, developers will most likely want to blindly configure `deep-link` to run on every request (`*`). A simple middleware could be plugged into
 one's Pipeline to perform this very function, but this feature has conveniently been made available free of charge. `deep-link` is already closely tied
 to login and authentication, so might as well....
 
