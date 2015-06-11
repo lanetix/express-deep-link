@@ -89,8 +89,17 @@ these options in order to use `deep-link`.
 
 #### login.local - Object (Required if not using login.remote)
 
-Instructs the middleware that the login endpoint is deployed to the same host/website (i.e. https://contoso.com/login) as
-the target website (where clients will deep link into) as opposed to a remote host (i.e. https://login.contoso.com).
+Instructs the middleware that the login endpoint is deployed to the same host/website as the target website (the one you'll be deep linking into)
+
+```
+https://contoso.com/login
+```
+
+as opposed to a remote host:
+
+```
+https://login.contoso.com
+```
 
 ##### login.local.path - String (Required if using login.local)
 
@@ -219,14 +228,21 @@ app.use(deepLink);
 
 Again, developers will most likely want to ignorantly configure `deep-link` to run on every request (`*`). A simple middleware could be plugged into
 one's Pipeline to perform this very function, but this feature has conveniently been made available free of charge. `deep-link` is already closely tied
-to login and authentication, so might as well
+to login and authentication, so might as well....
 
 > "go hard, or go home."
 
 #### login.remote - Object (Required if not using login.local)
 
-Instructs the middleware that the login endpoint is deployed to a remote (i.e. https://login.contoso.com) host/website as
-opposed to the target website (i.e. https://contoso.com/login).
+Instructs the middleware that the login endpoint is deployed to a remote host/website:
+
+```
+https://login.contoso.com)
+```
+
+as opposed to your target website (the one you'll be deep linking into):
+
+https://contoso.com/login
 
 ##### login.remote.url - String (Required if using login.remote)
 
