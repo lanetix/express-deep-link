@@ -338,9 +338,7 @@ app.use(deepLink);
 5. `deep-link` sees that the request is unauthenticated (in the same way it was when the login route was requested)
 6. `deep-link` stores the request to the static asset as the return url
 7. `deep-link` redirects back to the login route
-8. the login route requests the static asset again
-9. ....repeat
-10. ....infinite redirect
+8. asset not downloaded
 
 The skinny on this:
 
