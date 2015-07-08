@@ -4,6 +4,7 @@
   "description": "Provides deep linking capabilities via express middleware.",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint --ignore-path .gitignore .",
     "test": "gulp test"
   },
   "repository": {
@@ -27,6 +28,8 @@
     "lodash": "3.9.3"
   },
   "devDependencies": {
+    "eslint": "^0.24",
+    "eslint-plugin-nodeca": "^1",
     "gulp-mocha": "2.1.1",
     "should": "6.0.3",
     "sinon": "1.14.1"
