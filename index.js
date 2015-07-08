@@ -1,9 +1,11 @@
-var _ = require('lodash'),
-    url = require('url');
+'use strict';
 
-function validateOptions(options) {
+var _ = require('lodash'),
+  url = require('url');
+
+function validateOptions (options) {
   var localAndRemoteLoginAreBothProvided = options.login && options.login.local && options.login.remote,
-      loginPath;
+    loginPath;
 
   if (!options.login) {
     throw new Error('the login option is required.');
@@ -21,7 +23,7 @@ function validateOptions(options) {
     loginPath = options.login.local.path;
 
     if (!_.startsWith(loginPath, '/')) {
-       throw new Error('the login.local.path option must begin with a foward /');
+      throw new Error('the login.local.path option must begin with a foward /');
     }
   } else if (options.login.remote) {
     if (!options.login.remote.url) {
@@ -36,16 +38,16 @@ function validateOptions(options) {
   }
 }
 
-function normalizePath(path) {
+function normalizePath (path) {
   return (_.endsWith(path, '/') ? path : path + '/').toLowerCase();
 }
 
-function processAuthenticatedRequest(req, res, next, options) {
+function processAuthenticatedRequest (req, res, next, options) {
   var cookieName = (options.cookie && options.cookie.name) || 'returnUrl',
-      returnUrl = req.cookies[cookieName], returnUrlIsRelativeToBaseUrl,
-      normalizedRequestPath = normalizePath(req.path),
-      home = options.login.local && normalizedRequestPath === normalizePath(options.login.local.path)
-             && options.login.local.authenticated && options.login.local.authenticated.home;
+    returnUrl = req.cookies[cookieName], returnUrlIsRelativeToBaseUrl,
+    normalizedRequestPath = normalizePath(req.path),
+    home = options.login.local && normalizedRequestPath === normalizePath(options.login.local.path)
+      && options.login.local.authenticated && options.login.local.authenticated.home;
 
   if (returnUrl) {
     returnUrl = decodeURIComponent(returnUrl);
@@ -71,11 +73,11 @@ function processAuthenticatedRequest(req, res, next, options) {
   }
 }
 
-function processUnauthenticatedRequest(req, res, next, options) {
+function processUnauthenticatedRequest (req, res, next, options) {
   var cookieName = (options.cookie && options.cookie.name) || 'returnUrl',
     normalizedRequestPath = normalizePath(req.path),
     localLoginRouteRequested = options.login.local && normalizedRequestPath === normalizePath(options.login.local.path),
-    DEFAULT_COOKIE_OPTIONS = { httpOnly : true }, loginUrl;
+    DEFAULT_COOKIE_OPTIONS = {httpOnly: true}, loginUrl;
 
   if (options.login.local) {
     loginUrl = options.login.local.path;
@@ -87,7 +89,7 @@ function processUnauthenticatedRequest(req, res, next, options) {
     next();
   } else {
     var cookieOptions = (options.cookie && options.cookie.options) || {},
-        returnUrl = options.baseUrl ? url.resolve(options.baseUrl, req.originalUrl) : req.originalUrl;
+      returnUrl = options.baseUrl ? url.resolve(options.baseUrl, req.originalUrl) : req.originalUrl;
 
     cookieOptions = _.defaults(cookieOptions, DEFAULT_COOKIE_OPTIONS);
 
@@ -96,16 +98,16 @@ function processUnauthenticatedRequest(req, res, next, options) {
   }
 }
 
-module.exports = function(options) {
+module.exports = function (options) {
   validateOptions(options);
 
-  return function(req, res, next) {
+  return function (req, res, next) {
     var authenticated = options.authenticated(req),
-        getRequestIssued = req.method.toLowerCase() === 'get',
-        getRequestIssuedForFavicon = getRequestIssued && normalizePath(req.path) === '/favicon.ico/';
+      getRequestIssued = req.method.toLowerCase() === 'get',
+      getRequestIssuedForFavicon = getRequestIssued && normalizePath(req.path) === '/favicon.ico/';
 
     if (!getRequestIssued || getRequestIssuedForFavicon) {
-       next();
+      next();
     }
     else if (authenticated) {
       processAuthenticatedRequest(req, res, next, options);

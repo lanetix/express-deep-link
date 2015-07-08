@@ -147,11 +147,11 @@ authRouter.use(deepLink);
 
 apiRouter.use(auth);
 
-loginRouter.get('/', function(req, res) {
+loginRouter.get('/', function (req, res) {
   res.render('login');
 });
 
-loginRouter.post('/', function(req, res, next) {
+loginRouter.post('/', function (req, res, next) {
   // validate the user's credentials and log them
   // in if successful
 });
@@ -284,7 +284,7 @@ authentication middleware writes to the request. Let's give an example:
 
 var Authentication = require('../lib/authentication');
 
-function(req, res, next) {
+function (req, res, next) {
   var token = req.get('X-AUTH-TOKEN');
 
   if(!token) {
@@ -298,12 +298,12 @@ function(req, res, next) {
 
   Authentication
   .authenticate(token)
-  .then(function(tokenOrWhateverAuthYields) {
+  .then(function (tokenOrWhateverAuthYields) {
     // we can now pass this in as the authentication option
     req.user = tokenOrWhateverAuthYields;
     next();
   })
-  .error(function(e) {
+  .error(function (e) {
     // redirect to login since they gave us a bad token
   });
 }
@@ -317,7 +317,7 @@ var deep           = require('express-deep-link');
 var express        = require('express');
 
 var deepLink = deep({
-  authenticated : function() { return req.user; },
+  authenticated : function () { return req.user; },
   login         : 'https://secure.login.com'
 });
 
